@@ -18,11 +18,11 @@ export const products = [
       charity: "$6 per shirt to a charity you choose"
     },
     images: [
-      "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/f9403fc95_rehbar-artical-1.png",
-      "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/3320ac43e_rehbar-artical-2.png",
-      "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/245fb21a0_rehbar-artical-3.png"
+      "/images/rehbar-artical-1.png",
+      "/images/rehbar-artical-2.png",
+      "/images/rehbar-artical-3.png"
     ],
-    heroImage: "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/f9403fc95_rehbar-artical-1.png",
+    heroImage: "/images/rehbar-artical-1.png",
     blogTitle: "The Architecture of a Leader",
     blogContent: `In every era, the Rehbar emerges not by choice, but by necessity. The word itself — رهبر — carries a weight that transcends simple translation. It is not merely "leader." It is the one who walks the path first, who bears the weight of a thousand decisions so that those behind may walk with clarity.
 
@@ -55,11 +55,11 @@ There are only 100. And then the design enters the archive — never to be repri
       charity: "$6 per shirt to a charity you choose"
     },
     images: [
-      "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/72e95243c_Sejjil-artical.png",
-      "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/b272a2120_sejjil-artical-1.png",
-      "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/a24027b0d_Sejjil-artical-1.webp"
+      "/images/sejjil-artical.png",
+      "/images/sejjil-artical-1.png",
+      "/images/sejjil-artical-1.webp"
     ],
-    heroImage: "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/72e95243c_Sejjil-artical.png",
+    heroImage: "/images/sejjil-artical.png",
     blogTitle: "Stones of Destiny: The Sejjil Philosophy",
     blogContent: `Sejjil — سجیل — represents the moment where the small overcomes the monolithic. Baked clay that changed the course of empires. A substance so humble that armies would have laughed at the sight of it, until it became the instrument of their undoing.
 
@@ -94,11 +94,11 @@ The cracked earth on your back is not damage. It is evidence of what you survive
       charity: "$6 per shirt to a charity you choose"
     },
     images: [
-      "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/906beec6f_KhyberShikanartical.png",
-      "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/331b879d3_khyberShikan.png",
-      "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/906beec6f_KhyberShikanartical.png"
+      "/images/khybershikan-artical.png",
+      "/images/khybershikan.png",
+      "/images/khybershikan-artical.png"
     ],
-    heroImage: "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/906beec6f_KhyberShikanartical.png",
+    heroImage: "/images/khybershikan-artical.png",
     blogTitle: "Beyond the Pass: The Legacy of Khyber Shikan",
     blogContent: `The Khyber Pass has long been the gateway of conquerors. A jagged wound carved through the Hindu Kush, it has witnessed the march of Alexander, the campaigns of the Mughals, and the defiance of those who refused to let anyone pass unchallenged. To be a Shikan — a Breaker — is to master the impossible terrain of life.
 

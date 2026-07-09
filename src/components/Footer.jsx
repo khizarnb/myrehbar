@@ -22,7 +22,7 @@ export default function Footer() {
           <div className="grid md:grid-cols-2 gap-16 md:gap-24">
             <div>
               <img 
-                src="https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/15cc808f1_Rehbar-logo-white.png" 
+                src="/images/rehbar-logo-white.png" 
                 alt="Rehbar" 
                 className="h-16 w-auto mb-8"
               />

@@ -14,7 +14,7 @@ export default function About() {
       {/* Hero */}
       <div className="relative h-[50vh] overflow-hidden">
         <img
-          src="https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/b9a62053a_homepage-banner.webp"
+          src="/images/homepage-banner.webp"
           alt="Rehbar"
           className="w-full h-full object-cover opacity-40"
         />

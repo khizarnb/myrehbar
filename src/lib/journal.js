@@ -7,7 +7,7 @@ export const journalArticles = [
     subtitle: "The Story Behind the Brand",
     metaTitle: "Why We Built Rehbar | The Story Behind the Brand",
     excerpt: "Rehbar means leader. Here is why we built a clothing brand around that word, who it is for, and what every shirt is meant to carry.",
-    image: "https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/b9a62053a_homepage-banner.webp",
+    image: "/images/homepage-banner.webp",
     date: "Drop 001 — Journal",
     blocks: [
       { type: "paragraph", text: "There is an individual we kept thinking about while building this brand." },

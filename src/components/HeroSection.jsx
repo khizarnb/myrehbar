@@ -10,7 +10,7 @@ export default function HeroSection() {
       {/* Background portrait */}
       <div className="absolute inset-0">
         <img
-          src="https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/b9a62053a_homepage-banner.webp"
+          src="/images/homepage-banner.webp"
           alt="Rehbar"
           className="w-full h-full object-cover opacity-40"
         />

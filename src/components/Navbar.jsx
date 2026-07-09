@@ -22,7 +22,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between px-6 md:px-12 py-4">
           <Link to="/" className="flex items-center gap-3">
             <img 
-              src="https://media.db.com/images/public/user_6a4937b96c5a7751a556e044/15cc808f1_Rehbar-logo-white.png" 
+              src="/images/rehbar-logo-white.png" 
               alt="Rehbar" 
               className="h-8 w-auto invert-0"
             />
