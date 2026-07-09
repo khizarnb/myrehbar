@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "slug": {
+      "type": "string",
+      "description": "URL slug for the product"
+    },
+    "title": {
+      "type": "string",
+      "description": "Product title"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Product subtitle"
+    },
+    "price": {
+      "type": "number",
+      "description": "Price in USD"
+    },
+    "edition": {
+      "type": "string",
+      "description": "Edition size label"
+    },
+    "description": {
+      "type": "string",
+      "description": "Product description"
+    },
+    "specs_json": {
+      "type": "string",
+      "description": "JSON string of specifications"
+    },
+    "images_json": {
+      "type": "string",
+      "description": "JSON string of image URLs array"
+    },
+    "heroImage": {
+      "type": "string",
+      "description": "Hero image URL"
+    },
+    "blogTitle": {
+      "type": "string",
+      "description": "Blog article title"
+    },
+    "blogContent": {
+      "type": "string",
+      "description": "Blog article content"
+    },
+    "inventory": {
+      "type": "number",
+      "description": "Available inventory count",
+      "default": 100
+    },
+    "active": {
+      "type": "boolean",
+      "description": "Whether product is visible",
+      "default": true
+    }
+  },
+  "required": [
+    "slug",
+    "title",
+    "price"
+  ],
+  "name": "Product",
+  "type": "object"
+}

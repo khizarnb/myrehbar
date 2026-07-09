@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 6%;
+    --foreground: 40 20% 87%;
+    --card: 0 0% 8%;
+    --card-foreground: 40 20% 87%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 40 20% 87%;
+    --primary: 7 75% 44%;
+    --primary-foreground: 40 20% 87%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 40 20% 87%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 7 75% 44%;
+    --accent-foreground: 40 20% 87%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 7 75% 44%;
+    --chart-1: 7 75% 44%;
+    --chart-2: 30 60% 45%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0px;
+    --font-heading: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 40 20% 87%;
+    --sidebar-primary: 7 75% 44%;
+    --sidebar-primary-foreground: 40 20% 87%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 40 20% 87%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 7 75% 44%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: #C4311E;
+  color: #E6E2D3;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0F0F0F;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C4311E;
+}

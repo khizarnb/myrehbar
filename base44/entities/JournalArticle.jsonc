@@ -1,0 +1,38 @@
+{
+  "properties": {
+    "slug": {
+      "type": "string",
+      "description": "URL slug for the article"
+    },
+    "title": {
+      "type": "string",
+      "description": "Article title"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Article subtitle"
+    },
+    "excerpt": {
+      "type": "string",
+      "description": "Short excerpt"
+    },
+    "image": {
+      "type": "string",
+      "description": "Hero image URL"
+    },
+    "date": {
+      "type": "string",
+      "description": "Date or drop label"
+    },
+    "blocks_json": {
+      "type": "string",
+      "description": "JSON string of content blocks array"
+    }
+  },
+  "required": [
+    "slug",
+    "title"
+  ],
+  "name": "JournalArticle",
+  "type": "object"
+}

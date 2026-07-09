@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "order_number": {
+      "type": "string",
+      "description": "Unique order number"
+    },
+    "items_json": {
+      "type": "string",
+      "description": "JSON string of order items"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Customer full name"
+    },
+    "customer_email": {
+      "type": "string",
+      "description": "Customer email"
+    },
+    "shipping_address": {
+      "type": "string",
+      "description": "Shipping street address"
+    },
+    "shipping_city": {
+      "type": "string",
+      "description": "Shipping city"
+    },
+    "shipping_country": {
+      "type": "string",
+      "description": "Shipping country"
+    },
+    "shipping_zip": {
+      "type": "string",
+      "description": "Shipping zip code"
+    },
+    "charity": {
+      "type": "string",
+      "description": "Selected charity"
+    },
+    "subtotal": {
+      "type": "number",
+      "description": "Subtotal amount"
+    },
+    "shipping_cost": {
+      "type": "number",
+      "description": "Shipping cost"
+    },
+    "charity_donation": {
+      "type": "number",
+      "description": "Charity donation amount"
+    },
+    "total": {
+      "type": "number",
+      "description": "Total order amount"
+    },
+    "status": {
+      "type": "string",
+      "description": "Order status",
+      "default": "pending"
+    }
+  },
+  "required": [
+    "order_number",
+    "customer_name",
+    "customer_email",
+    "total"
+  ],
+  "name": "Order",
+  "type": "object"
+}
