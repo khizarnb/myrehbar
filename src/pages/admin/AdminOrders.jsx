@@ -19,7 +19,8 @@ export default function AdminOrders() {
   });
 
   const parseItems = (o) => {
-    try { return JSON.parse(o.items_json || '[]'); } catch { return []; }
+    if (Array.isArray(o.items)) return o.items;
+    try { return typeof o.items === 'string' ? JSON.parse(o.items) : (JSON.parse(o.items_json || '[]')); } catch { return []; }
   };
 
   return (

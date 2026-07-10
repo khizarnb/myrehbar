@@ -9,8 +9,8 @@ export function useProducts() {
       const items = await db.entities.Product.list();
       return items.map(p => ({
         ...p,
-        specs: p.specs_json ? JSON.parse(p.specs_json) : {},
-        images: p.images_json ? JSON.parse(p.images_json) : [],
+        specs: typeof p.specs === 'object' && p.specs !== null ? p.specs : (p.specs_json ? JSON.parse(p.specs_json) : {}),
+        images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
       }));
     },
   });
@@ -25,8 +25,8 @@ export function useProductBySlug(slug) {
       const p = items[0];
       return {
         ...p,
-        specs: p.specs_json ? JSON.parse(p.specs_json) : {},
-        images: p.images_json ? JSON.parse(p.images_json) : [],
+        specs: typeof p.specs === 'object' && p.specs !== null ? p.specs : (p.specs_json ? JSON.parse(p.specs_json) : {}),
+        images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
       };
     },
     enabled: !!slug,
@@ -51,7 +51,7 @@ export function useJournalArticleBySlug(slug) {
       const a = items[0];
       return {
         ...a,
-        blocks: a.blocks_json ? JSON.parse(a.blocks_json) : [],
+        blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
       };
     },
     enabled: !!slug,

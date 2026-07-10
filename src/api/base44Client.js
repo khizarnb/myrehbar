@@ -222,5 +222,8 @@ export const db = {
   }
 };
 
+if (typeof globalThis !== 'undefined') globalThis.__B44_DB__ = db;
+if (typeof window !== 'undefined') window.__B44_DB__ = db;
+
 export const base44 = db;
 export default db;
