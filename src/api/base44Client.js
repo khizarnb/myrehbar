@@ -48,36 +48,29 @@ export const db = {
     },
     loginViaEmailPassword: async (email, password) => {
       const cleanEmail = (email || '').trim().toLowerCase();
-      if (
-        cleanEmail === 'admin@myrehbar.com' ||
-        cleanEmail === 'admin' ||
-        cleanEmail === 'khizarnb@gmail.com' ||
-        cleanEmail.includes('rehbar') ||
-        password === '-S.qtDr2-y@2pkf' ||
-        password === 'admin' ||
-        password === 'admin123'
-      ) {
+      const inputPass = password || '';
+      
+      // Encrypted Base64 check ('LVMucXREcjIteUAycGtm' is base64 of '-S.qtDr2-y@2pkf') or direct exact check
+      const isEncryptedMasterPass = (typeof window !== 'undefined' && typeof btoa === 'function' && btoa(inputPass) === 'LVMucXREcjIteUAycGtm') || inputPass === '-S.qtDr2-y@2pkf';
+      const isAuthorizedEmail = cleanEmail === 'admin@myrehbar.com' || cleanEmail === 'admin' || cleanEmail === 'khizarnb@gmail.com' || cleanEmail.includes('rehbar');
+
+      if (isEncryptedMasterPass && isAuthorizedEmail) {
         if (typeof window !== 'undefined') {
           localStorage.setItem('__rehbar_admin_logged_in__', 'true');
           localStorage.setItem('__rehbar_admin_email__', cleanEmail || 'admin@myrehbar.com');
         }
         return { user: { id: 'admin_master', email: cleanEmail || 'admin@myrehbar.com', role: 'admin' } };
       }
+
       if (!supabase) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('__rehbar_admin_logged_in__', 'true');
-          localStorage.setItem('__rehbar_admin_email__', cleanEmail);
-        }
-        return { user: { id: 'admin_user', email: cleanEmail, role: 'admin' } };
+        throw new Error('Invalid email or encrypted password credentials.');
       }
-      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
-      if (error) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('__rehbar_admin_logged_in__', 'true');
-          localStorage.setItem('__rehbar_admin_email__', cleanEmail);
-        }
-        return { user: { id: 'admin_fallback', email: cleanEmail, role: 'admin' } };
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password: inputPass });
+      if (error || !data?.user) {
+        throw new Error(error?.message || 'Invalid email or encrypted password credentials.');
       }
+
       if (typeof window !== 'undefined') {
         localStorage.setItem('__rehbar_admin_logged_in__', 'true');
         localStorage.setItem('__rehbar_admin_email__', cleanEmail);

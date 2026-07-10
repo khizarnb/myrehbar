@@ -130,33 +130,7 @@ export default function Checkout() {
     );
   }
 
-  // Auth check
-  if (authed === null) {
-    return (
-      <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#333] border-t-[#C4311E] rounded-full animate-spin"></div>
-      </div>
-    );
-  }
 
-  if (authed === false) {
-    return (
-      <div className="min-h-screen bg-[#0F0F0F]">
-        <Navbar />
-        <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-          <Lock className="text-[#C4311E] mb-6" size={32} />
-          <h1 className="font-heading text-3xl md:text-4xl font-black tracking-[0.1em] text-[#E6E2D3] mb-4">SIGN IN TO COMPLETE YOUR ORDER</h1>
-          <p className="font-body text-sm text-[#E6E2D3]/50 max-w-md mb-8">Your cart will be waiting when you return.</p>
-          <button
-            onClick={() => db.auth.redirectToLogin("/checkout")}
-            className="bg-[#C4311E] hover:bg-[#a02818] text-[#E6E2D3] px-12 py-4 font-heading font-bold text-sm tracking-[0.3em] uppercase transition-colors"
-          >
-            Sign In
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#0F0F0F]">
