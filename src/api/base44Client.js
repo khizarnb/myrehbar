@@ -381,6 +381,90 @@ export const db = {
         if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_journals__', JSON.stringify(list));
         return { success: true };
       }
+    },
+    ContactMessage: {
+      list: async () => {
+        if (supabase) {
+          const { data, error } = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false });
+          if (!error && data) return data;
+        }
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_messages__');
+          if (local) { try { return JSON.parse(local); } catch {} }
+        }
+        return [
+          {
+            id: 'msg_sample1',
+            name: 'Ahmad Khan',
+            email: 'ahmad.k@example.com',
+            message: 'Hello, what is the exact GSM and material blend used for THE VANGUARD oversized t-shirt? Looking to place a bulk custom order.',
+            created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+            read: false
+          },
+          {
+            id: 'msg_sample2',
+            name: 'Zainab Bilal',
+            email: 'zainab@example.org',
+            message: 'Do you ship to Dubai and what are the expected customs timelines for limited edition drops?',
+            created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
+            read: true
+          }
+        ];
+      },
+      create: async (data) => {
+        if (supabase) {
+          const { data: created, error } = await supabase.from('contact_messages').insert([data]).select().single();
+          if (!error && created) return created;
+        }
+        let list = [];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_messages__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+          else {
+            list = [
+              {
+                id: 'msg_sample1',
+                name: 'Ahmad Khan',
+                email: 'ahmad.k@example.com',
+                message: 'Hello, what is the exact GSM and material blend used for THE VANGUARD oversized t-shirt? Looking to place a bulk custom order.',
+                created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+                read: false
+              }
+            ];
+          }
+        }
+        const newItem = { id: 'msg_' + Date.now(), read: false, ...data };
+        list.unshift(newItem);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_messages__', JSON.stringify(list));
+        return newItem;
+      },
+      update: async (id, data) => {
+        if (supabase) {
+          const { data: updated, error } = await supabase.from('contact_messages').update(data).eq('id', id).select().single();
+          if (!error && updated) return updated;
+        }
+        let list = [];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_messages__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        list = list.map(m => m.id === id ? { ...m, ...data } : m);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_messages__', JSON.stringify(list));
+        return list.find(m => m.id === id) || { id, ...data };
+      },
+      delete: async (id) => {
+        if (supabase) {
+          await supabase.from('contact_messages').delete().eq('id', id);
+        }
+        let list = [];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_messages__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        list = list.filter(m => m.id !== id);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_messages__', JSON.stringify(list));
+        return { success: true };
+      }
     }
   },
   integrations: {

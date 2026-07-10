@@ -6,7 +6,7 @@ import { LogIn, Lock, Mail, AlertCircle, ArrowRight } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("admin@myrehbar.com");
-  const [password, setPassword] = useState("-S.qtDr2-y@2pkf");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 

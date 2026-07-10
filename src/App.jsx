@@ -24,6 +24,7 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminProducts from '@/pages/admin/AdminProducts';
 import AdminOrders from '@/pages/admin/AdminOrders';
 import AdminJournal from '@/pages/admin/AdminJournal';
+import AdminMessages from '@/pages/admin/AdminMessages';
 import Login from '@/pages/Login';
 
 const AuthenticatedApp = () => {
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/journal" element={<AdminJournal />} />
+          <Route path="/admin/messages" element={<AdminMessages />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

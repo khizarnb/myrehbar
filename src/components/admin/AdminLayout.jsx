@@ -2,13 +2,14 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingCart, FileText, ExternalLink, Lock, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, FileText, ExternalLink, Lock, LogOut, MessageSquare } from "lucide-react";
 
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { to: "/admin/journal", label: "Journal", icon: FileText },
+  { to: "/admin/messages", label: "Messages", icon: MessageSquare },
 ];
 
 export default function AdminLayout() {
