@@ -15,6 +15,10 @@ CREATE TABLE IF NOT EXISTS public.products (
     specs JSONB DEFAULT '{}'::jsonb,
     images JSONB DEFAULT '[]'::jsonb,
     "heroImage" TEXT,
+    "blogTitle" TEXT,
+    "blogContent" TEXT,
+    inventory INTEGER DEFAULT 100,
+    active BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
