@@ -24,6 +24,7 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminProducts from '@/pages/admin/AdminProducts';
 import AdminOrders from '@/pages/admin/AdminOrders';
 import AdminJournal from '@/pages/admin/AdminJournal';
+import Login from '@/pages/Login';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -47,6 +48,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
       <Route path="/" element={<Home />} />
       <Route path="/product/:slug" element={<ProductDetail />} />
       <Route path="/article/:slug" element={<Article />} />

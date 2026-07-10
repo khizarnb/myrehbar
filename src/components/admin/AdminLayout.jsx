@@ -2,7 +2,7 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingCart, FileText, ExternalLink, Lock } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, FileText, ExternalLink, Lock, LogOut } from "lucide-react";
 
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -20,6 +20,10 @@ export default function AdminLayout() {
     db.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
+  const handleLogout = () => {
+    db.auth.logout('/login');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
@@ -35,7 +39,7 @@ export default function AdminLayout() {
           <Lock className="mx-auto mb-6 text-[#C4311E]" size={48} />
           <h1 className="font-heading text-3xl font-black text-[#E6E2D3] mb-4">ACCESS DENIED</h1>
           <p className="font-body text-[#E6E2D3]/60 mb-8">You need admin privileges to access this area.</p>
-          <Link to="/" className="font-mono text-sm text-[#C4311E] hover:text-[#E6E2D3] transition-colors">Return to Site</Link>
+          <Link to="/login" className="font-mono text-sm text-[#C4311E] hover:text-[#E6E2D3] transition-colors">Go to Admin Login</Link>
         </div>
       </div>
     );
@@ -60,11 +64,15 @@ export default function AdminLayout() {
             );
           })}
         </nav>
-        <div className="px-6 py-6 border-t border-[#1a1a1a]">
+        <div className="px-6 py-4 border-t border-[#1a1a1a] space-y-3">
           <Link to="/" className="flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-[#6B6B6B] hover:text-[#E6E2D3] uppercase transition-colors">
             <ExternalLink size={14} />
             View Site
           </Link>
+          <button onClick={handleLogout} className="w-full flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-[#C4311E] hover:text-[#E6E2D3] uppercase transition-colors">
+            <LogOut size={14} />
+            Log Out
+          </button>
         </div>
       </aside>
 
