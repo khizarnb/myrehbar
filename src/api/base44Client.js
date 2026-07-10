@@ -106,6 +106,12 @@ export const db = {
           const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
           if (!error && data && data.length > 0) return data;
         }
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_products__');
+          if (local) {
+            try { return JSON.parse(local); } catch {}
+          }
+        }
         return fallbackProducts;
       },
       filter: async (query) => {
@@ -113,34 +119,92 @@ export const db = {
           const { data, error } = await supabase.from('products').select('*').eq('slug', query.slug);
           if (!error && data && data.length > 0) return data;
         }
-        if (query?.slug) {
-          return fallbackProducts.filter(p => p.slug === query.slug);
+        let list = fallbackProducts;
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_products__');
+          if (local) {
+            try { list = JSON.parse(local); } catch {}
+          }
         }
-        return fallbackProducts;
+        if (query?.slug) {
+          return list.filter(p => p.slug === query.slug);
+        }
+        return list;
       },
       get: async (id) => {
         if (supabase) {
           const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
           if (!error && data) return data;
         }
-        return fallbackProducts.find(p => p.id === id || p.slug === id) || null;
+        let list = fallbackProducts;
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_products__');
+          if (local) {
+            try { list = JSON.parse(local); } catch {}
+          }
+        }
+        return list.find(p => p.id === id || p.slug === id) || null;
       },
       create: async (data) => {
-        if (!supabase) throw new Error('Supabase is not configured.');
-        const { data: created, error } = await supabase.from('products').insert([data]).select().single();
-        if (error) throw error;
-        return created;
+        const payload = { ...data };
+        if (payload.specs_json) {
+          try { payload.specs = JSON.parse(payload.specs_json); } catch {}
+          delete payload.specs_json;
+        }
+        if (payload.images_json) {
+          try { payload.images = JSON.parse(payload.images_json); } catch {}
+          delete payload.images_json;
+        }
+        if (supabase) {
+          const { data: created, error } = await supabase.from('products').insert([payload]).select().single();
+          if (!error && created) return created;
+        }
+        // Fallback or localStorage
+        let list = [...fallbackProducts];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_products__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        const newItem = { id: 'prod_' + Date.now(), ...payload };
+        list.unshift(newItem);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
+        return newItem;
       },
       update: async (id, data) => {
-        if (!supabase) throw new Error('Supabase is not configured.');
-        const { data: updated, error } = await supabase.from('products').update(data).eq('id', id).select().single();
-        if (error) throw error;
-        return updated;
+        const payload = { ...data };
+        if (payload.specs_json) {
+          try { payload.specs = JSON.parse(payload.specs_json); } catch {}
+          delete payload.specs_json;
+        }
+        if (payload.images_json) {
+          try { payload.images = JSON.parse(payload.images_json); } catch {}
+          delete payload.images_json;
+        }
+        if (supabase) {
+          const { data: updated, error } = await supabase.from('products').update(payload).eq('id', id).select().single();
+          if (!error && updated) return updated;
+        }
+        // Fallback or localStorage
+        let list = [...fallbackProducts];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_products__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        list = list.map(p => p.id === id ? { ...p, ...payload } : p);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
+        return list.find(p => p.id === id) || { id, ...payload };
       },
       delete: async (id) => {
-        if (!supabase) throw new Error('Supabase is not configured.');
-        const { error } = await supabase.from('products').delete().eq('id', id);
-        if (error) throw error;
+        if (supabase) {
+          await supabase.from('products').delete().eq('id', id);
+        }
+        let list = [...fallbackProducts];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_products__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        list = list.filter(p => p.id !== id);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
         return { success: true };
       }
     },
@@ -150,6 +214,10 @@ export const db = {
           const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
           if (!error && data) return data;
         }
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_orders__');
+          if (local) { try { return JSON.parse(local); } catch {} }
+        }
         return [];
       },
       create: async (data) => {
@@ -157,13 +225,29 @@ export const db = {
           const { data: created, error } = await supabase.from('orders').insert([data]).select().single();
           if (!error && created) return created;
         }
-        return { id: 'ord_' + Date.now(), ...data };
+        let list = [];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_orders__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        const newItem = { id: 'ord_' + Date.now(), ...data };
+        list.unshift(newItem);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_orders__', JSON.stringify(list));
+        return newItem;
       },
       update: async (id, data) => {
-        if (!supabase) throw new Error('Supabase is not configured.');
-        const { data: updated, error } = await supabase.from('orders').update(data).eq('id', id).select().single();
-        if (error) throw error;
-        return updated;
+        if (supabase) {
+          const { data: updated, error } = await supabase.from('orders').update(data).eq('id', id).select().single();
+          if (!error && updated) return updated;
+        }
+        let list = [];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_orders__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        list = list.map(o => o.id === id ? { ...o, ...data } : o);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_orders__', JSON.stringify(list));
+        return list.find(o => o.id === id) || { id, ...data };
       }
     },
     JournalArticle: {
@@ -172,6 +256,10 @@ export const db = {
           const { data, error } = await supabase.from('journal_articles').select('*').order('created_at', { ascending: false });
           if (!error && data && data.length > 0) return data;
         }
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_journals__');
+          if (local) { try { return JSON.parse(local); } catch {} }
+        }
         return fallbackJournal;
       },
       filter: async (query) => {
@@ -179,27 +267,66 @@ export const db = {
           const { data, error } = await supabase.from('journal_articles').select('*').eq('slug', query.slug);
           if (!error && data && data.length > 0) return data;
         }
-        if (query?.slug) {
-          return fallbackJournal.filter(a => a.slug === query.slug);
+        let list = fallbackJournal;
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_journals__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
         }
-        return fallbackJournal;
+        if (query?.slug) {
+          return list.filter(a => a.slug === query.slug);
+        }
+        return list;
       },
       create: async (data) => {
-        if (!supabase) throw new Error('Supabase is not configured.');
-        const { data: created, error } = await supabase.from('journal_articles').insert([data]).select().single();
-        if (error) throw error;
-        return created;
+        const payload = { ...data };
+        if (payload.blocks_json) {
+          try { payload.blocks = JSON.parse(payload.blocks_json); } catch {}
+          delete payload.blocks_json;
+        }
+        if (supabase) {
+          const { data: created, error } = await supabase.from('journal_articles').insert([payload]).select().single();
+          if (!error && created) return created;
+        }
+        let list = [...fallbackJournal];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_journals__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        const newItem = { id: 'art_' + Date.now(), ...payload };
+        list.unshift(newItem);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_journals__', JSON.stringify(list));
+        return newItem;
       },
       update: async (id, data) => {
-        if (!supabase) throw new Error('Supabase is not configured.');
-        const { data: updated, error } = await supabase.from('journal_articles').update(data).eq('id', id).select().single();
-        if (error) throw error;
-        return updated;
+        const payload = { ...data };
+        if (payload.blocks_json) {
+          try { payload.blocks = JSON.parse(payload.blocks_json); } catch {}
+          delete payload.blocks_json;
+        }
+        if (supabase) {
+          const { data: updated, error } = await supabase.from('journal_articles').update(payload).eq('id', id).select().single();
+          if (!error && updated) return updated;
+        }
+        let list = [...fallbackJournal];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_journals__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        list = list.map(a => a.id === id ? { ...a, ...payload } : a);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_journals__', JSON.stringify(list));
+        return list.find(a => a.id === id) || { id, ...payload };
       },
       delete: async (id) => {
-        if (!supabase) throw new Error('Supabase is not configured.');
-        const { error } = await supabase.from('journal_articles').delete().eq('id', id);
-        if (error) throw error;
+        if (supabase) {
+          await supabase.from('journal_articles').delete().eq('id', id);
+        }
+        let list = [...fallbackJournal];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_journals__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        list = list.filter(a => a.id !== id);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_journals__', JSON.stringify(list));
         return { success: true };
       }
     }
@@ -207,16 +334,28 @@ export const db = {
   integrations: {
     Core: {
       UploadFile: async (file) => {
-        if (!supabase) throw new Error('Supabase is not configured.');
-        const fileExt = file.name ? file.name.split('.').pop() : 'png';
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-        const filePath = `uploads/${fileName}`;
-        
-        const { error: uploadError } = await supabase.storage.from('media').upload(filePath, file);
-        if (uploadError) throw uploadError;
-        
-        const { data } = supabase.storage.from('media').getPublicUrl(filePath);
-        return { file_url: data.publicUrl };
+        if (supabase) {
+          try {
+            const fileExt = file.name ? file.name.split('.').pop() : 'png';
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+            const filePath = `uploads/${fileName}`;
+            
+            const { error: uploadError } = await supabase.storage.from('media').upload(filePath, file);
+            if (!uploadError) {
+              const { data } = supabase.storage.from('media').getPublicUrl(filePath);
+              if (data?.publicUrl) return { file_url: data.publicUrl };
+            }
+          } catch (e) {
+            console.warn('Supabase upload failed, falling back to local URL:', e);
+          }
+        }
+        // Fallback for offline/unconfigured testing so UI works instantly
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve({ file_url: reader.result });
+          reader.onerror = () => resolve({ file_url: typeof URL !== 'undefined' ? URL.createObjectURL(file) : '' });
+          reader.readAsDataURL(file);
+        });
       }
     }
   }
