@@ -1,15 +1,8 @@
--- ====================================================================
--- SUPABASE DATA IMPORT & SYNC SCRIPT (GENERATED FROM LIVE BASE44 DATA)
--- Copy and paste this entire script into your Supabase SQL Editor and run!
--- ====================================================================
-
--- Ensure required columns exist on products table
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "blogTitle" TEXT;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "blogContent" TEXT;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "inventory" INTEGER DEFAULT 100;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "active" BOOLEAN DEFAULT true;
 
--- Import Products
 INSERT INTO public.products (id, slug, title, subtitle, price, edition, description, specs, images, "heroImage", "inventory", "blogTitle", "blogContent", "active")
 VALUES (
   '6a4fbf02508a18fce23927c9',
@@ -146,7 +139,6 @@ ON CONFLICT (id) DO UPDATE SET
   "blogContent" = EXCLUDED."blogContent",
   "active" = EXCLUDED."active";
 
--- Import Journal Articles
 INSERT INTO public.journal_articles (id, slug, title, subtitle, "metaTitle", excerpt, image, date, blocks)
 VALUES (
   '6a4fbf02c36addc8bbbcf0d2',
@@ -168,4 +160,3 @@ ON CONFLICT (id) DO UPDATE SET
   image = EXCLUDED.image,
   date = EXCLUDED.date,
   blocks = EXCLUDED.blocks;
-
