@@ -7,6 +7,7 @@ import { useCurrency } from "@/lib/CurrencyContext";
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import StripePaymentSection from "@/components/StripePaymentSection";
 import { Check, Lock, ChevronLeft } from "lucide-react";
 
 const CHARITIES = [
@@ -76,13 +77,13 @@ export default function Checkout() {
   const canProceedCharity = form.charity === "Muslim Charity (Custom)" ? !!form.customCharity?.trim() : !!form.charity;
   const canPlaceOrder = form.cardNumber.replace(/\s/g, "").length === 16 && form.cardName && form.expiry.length === 5 && form.cvc.length >= 3;
 
-  const placeOrder = async () => {
-    if (!canPlaceOrder) { setError("Please complete all payment fields."); return; }
+  const placeOrder = async (isPaid = false) => {
     setSubmitting(true);
     setError("");
     const chosenCharity = form.charity === "Muslim Charity (Custom)" ? `Custom: ${form.customCharity}` : form.charity;
     const orderNumber = "REH-" + Date.now().toString().slice(-6);
     const formattedTotal = formatPrice(total);
+    const orderStatus = isPaid === true ? "paid" : "pending";
     const orderData = {
       order_number: orderNumber,
       order_items: items.map(i => ({ product_id: i.slug, product_title: i.title, size: i.size, quantity: i.quantity, price: i.price, price_formatted: formatPrice(i.price) })),
@@ -100,7 +101,7 @@ export default function Checkout() {
       total: total,
       total_formatted: formattedTotal,
       currency: currency,
-      status: "pending",
+      status: orderStatus,
       created_date: new Date().toISOString()
     };
     try {
@@ -120,7 +121,7 @@ export default function Checkout() {
         charity_donation: orderData.charity_donation,
         total: orderData.total,
         total_formatted: formattedTotal,
-        status: "pending"
+        status: orderStatus
       });
     } catch (e) { /* order save failed, continue to confirmation */ }
     clearCart();
@@ -243,31 +244,19 @@ export default function Checkout() {
 
             {/* Step 3: Payment */}
             {step === 3 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <Lock size={14} className="text-[#6B6B6B]" />
-                  <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase">Secure Payment</p>
-                </div>
-                <Field label="Card Number" value={form.cardNumber} onChange={v => set("cardNumber", formatCard(v))} placeholder="0000 0000 0000 0000" />
-                <Field label="Name on Card" value={form.cardName} onChange={v => set("cardName", v)} placeholder="Name as it appears on card" />
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Expiry (MM/YY)" value={form.expiry} onChange={v => set("expiry", formatExpiry(v))} placeholder="MM/YY" />
-                  <Field label="CVC" value={form.cvc} onChange={v => set("cvc", v.replace(/\D/g, "").slice(0, 4))} placeholder="123" />
-                </div>
-                {error && <p className="font-mono text-xs tracking-wider text-[#C4311E]">{error}</p>}
-                <div className="flex gap-4 pt-2 items-center">
-                  <button onClick={() => setStep(2)} className="font-mono text-xs tracking-[0.3em] text-[#6B6B6B] hover:text-[#E6E2D3] uppercase transition-colors">← Back</button>
-                  <button
-                    onClick={placeOrder}
-                    disabled={!canPlaceOrder || submitting}
-                    className="bg-[#C4311E] hover:bg-[#a02818] disabled:bg-[#333] disabled:cursor-not-allowed text-[#E6E2D3] px-12 py-4 font-heading font-bold text-sm tracking-[0.3em] uppercase transition-colors ml-auto flex items-center gap-3"
-                  >
-                    {submitting
-                      ? <span className="w-4 h-4 border-2 border-[#E6E2D3] border-t-transparent rounded-full animate-spin" />
-                      : `Place Order — ${formatPrice(total)}`}
-                  </button>
-                </div>
-              </div>
+              <StripePaymentSection
+                amount={convertPrice(total)}
+                currency={currency}
+                orderNumber={"REH-" + Date.now().toString().slice(-6)}
+                customerEmail={form.email}
+                customerName={form.name}
+                totalFormatted={formatPrice(total)}
+                onOrderPlace={placeOrder}
+                submitting={submitting}
+                error={error}
+                setError={setError}
+                onBack={() => setStep(2)}
+              />
             )}
           </div>
 
