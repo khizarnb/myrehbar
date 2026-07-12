@@ -3,6 +3,7 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "@/lib/CartContext";
+import { useCurrency } from "@/lib/CurrencyContext";
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -37,6 +38,7 @@ function Field({ label, value, onChange, placeholder, type }) {
 
 export default function Checkout() {
   const { items, subtotal, clearCart, cartCount } = useCart();
+  const { formatPrice, convertPrice, currency } = useCurrency();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [authed, setAuthed] = useState(null);
@@ -80,9 +82,10 @@ export default function Checkout() {
     setError("");
     const chosenCharity = form.charity === "Muslim Charity (Custom)" ? `Custom: ${form.customCharity}` : form.charity;
     const orderNumber = "REH-" + Date.now().toString().slice(-6);
+    const formattedTotal = formatPrice(total);
     const orderData = {
       order_number: orderNumber,
-      order_items: items.map(i => ({ product_id: i.slug, product_title: i.title, size: i.size, quantity: i.quantity, price: i.price })),
+      order_items: items.map(i => ({ product_id: i.slug, product_title: i.title, size: i.size, quantity: i.quantity, price: i.price, price_formatted: formatPrice(i.price) })),
       customer_name: form.name,
       customer_email: form.email,
       customer_phone: form.phone || "",
@@ -95,6 +98,8 @@ export default function Checkout() {
       shipping_cost: SHIPPING_COST,
       charity_donation: charityDonation,
       total: total,
+      total_formatted: formattedTotal,
+      currency: currency,
       status: "pending",
       created_date: new Date().toISOString()
     };
@@ -114,6 +119,7 @@ export default function Checkout() {
         shipping_cost: orderData.shipping_cost,
         charity_donation: orderData.charity_donation,
         total: orderData.total,
+        total_formatted: formattedTotal,
         status: "pending"
       });
     } catch (e) { /* order save failed, continue to confirmation */ }
@@ -258,7 +264,7 @@ export default function Checkout() {
                   >
                     {submitting
                       ? <span className="w-4 h-4 border-2 border-[#E6E2D3] border-t-transparent rounded-full animate-spin" />
-                      : `Place Order — CA$${total}`}
+                      : `Place Order — ${formatPrice(total)}`}
                   </button>
                 </div>
               </div>
@@ -276,7 +282,7 @@ export default function Checkout() {
                     <div className="flex-1 flex flex-col justify-center">
                       <p className="font-heading text-xs font-bold text-[#E6E2D3] tracking-wide">{item.title}</p>
                       <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] uppercase mt-1">Size {item.size} — Qty {item.quantity}</p>
-                      <p className="font-body text-xs text-[#E6E2D3]/80 mt-1">CA${item.price * item.quantity}</p>
+                      <p className="font-body text-xs text-[#E6E2D3]/80 mt-1">{formatPrice(item.price * item.quantity)}</p>
                     </div>
                   </div>
                 ))}
@@ -284,19 +290,19 @@ export default function Checkout() {
               <div className="space-y-2 pt-4 border-t border-[#1a1a1a]">
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Subtotal</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">CA${subtotal}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Shipping</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">CA${SHIPPING_COST}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">{formatPrice(SHIPPING_COST)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Charity</span>
-                  <span className="font-body text-sm text-[#C4311E]">CA${charityDonation}</span>
+                  <span className="font-body text-sm text-[#C4311E]">{formatPrice(charityDonation)}</span>
                 </div>
                 <div className="flex justify-between pt-3 mt-3 border-t border-[#1a1a1a]">
                   <span className="font-heading text-sm font-bold text-[#E6E2D3]">Total</span>
-                  <span className="font-heading text-xl font-black text-[#C4311E]">CA${total}</span>
+                  <span className="font-heading text-xl font-black text-[#C4311E]">{formatPrice(total)}</span>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
+const db = globalThis.__B44_DB__ || { auth: { isAuthenticated: async () => false, me: async () => null }, entities: new Proxy({}, { get: () => ({ filter: async () => [], get: async () => null, create: async () => ({}), update: async () => ({}), delete: async () => ({}) }) }), integrations: { Core: { UploadFile: async () => ({ file_url: '' }) } } };
 
 import React from "react";
 import { motion } from "framer-motion";
@@ -62,7 +62,7 @@ export default function HeroSection() {
       {/* Vertical metadata strip */}
       <div className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 hidden md:block">
         <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] writing-mode-vertical rotate-180" style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}>
-          REHBAR — رهبر — COLLECTION — TORONTO.CA
+          REHBAR — رهبر — COLLECTION — LIMITED EDITION
         </p>
       </div>
 

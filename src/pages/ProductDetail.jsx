@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useProductBySlug } from "@/lib/entityData";
 import { useCart } from "@/lib/CartContext";
+import { useCurrency } from "@/lib/CurrencyContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
@@ -15,6 +16,7 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
   const { addItem, setIsCartOpen } = useCart();
+  const { formatPrice, currency } = useCurrency();
   const navigate = useNavigate();
 
   const handleAddToCart = () => {
@@ -107,8 +109,8 @@ export default function ProductDetail() {
             </p>
 
             <div className="mt-8 mb-10">
-              <span className="font-heading text-4xl font-black text-[#C4311E]">CA${product.price}</span>
-              <span className="font-mono text-xs text-[#6B6B6B] ml-2 tracking-wider">CA</span>
+              <span className="font-heading text-4xl font-black text-[#C4311E]">{formatPrice(product.price)}</span>
+              <span className="font-mono text-xs text-[#6B6B6B] ml-2 tracking-wider uppercase">{currency}</span>
             </div>
 
             {/* Description */}
