@@ -60,25 +60,25 @@ export default function About() {
 
           <h2 className="font-heading text-2xl md:text-3xl font-black tracking-wide text-[#E6E2D3] mt-14 mb-6">Why We Make Everything Ourselves</h2>
 
-          <motion.p initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }} className="font-body text-lg text-[#E6E2D3]/80 leading-[1.8] mb-8">
-            Every Rehbar shirt begins as yarn in our own facility in Pakistan. We knit the fabric, cut it, sew it, and print it. We chose this because it is the only way to control what actually matters to the person wearing the shirt: fabric that feels the same in the tenth wash as the first, print that does not crack, a fit we can hold consistent from drop to drop.
-          </motion.p>
+          <p className="font-body text-lg text-[#E6E2D3]/80 leading-[1.8] mb-8">
+            Every Rehbar shirt begins as yarn in our global studio facility. We knit the fabric, cut it, sew it, and print it. We chose this because it is the only way to control what actually matters to the person wearing the shirt: fabric that feels the same in the tenth wash as the first, print that does not crack, and a fit we hold consistent across every collection.
+          </p>
 
-          <motion.p initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }} className="font-body text-lg text-[#E6E2D3]/80 leading-[1.8] mb-8">
-            The artists who create our designs are trained calligraphers and designers from within the community. We credit them as a collective and keep them anonymous by their preference and ours, because the spotlight in this brand points at the story and at the wearer, never at a name on a label.
-          </motion.p>
+          <p className="font-body text-lg text-[#E6E2D3]/80 leading-[1.8] mb-8">
+            The artists who create our designs are trained calligraphers and designers from across the globe. We celebrate their craftsmanship and collective dedication, because the spotlight in this brand points at the story and at the wearer.
+          </p>
 
           <h2 className="font-heading text-2xl md:text-3xl font-black tracking-wide text-[#E6E2D3] mt-14 mb-6">Why Every Purchase Gives</h2>
 
-          <motion.p initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }} className="font-body text-lg text-[#E6E2D3]/80 leading-[1.8] mb-8">
-            Leadership in our tradition has never been separable from responsibility for others. So we built giving into the structure of the brand rather than bolting it on as marketing. From every shirt sold, a fixed $6 donation goes to a cause you choose at checkout, from verified organisations working in humanitarian aid, education, community infrastructure, and food poverty.
-          </motion.p>
+          <p className="font-body text-lg text-[#E6E2D3]/80 leading-[1.8] mb-8">
+            Leadership in our tradition has never been separable from responsibility for others. So we built giving into the structure of the brand rather than bolting it on as marketing. From every shirt sold, a direct donation goes to a cause you choose at checkout, supporting verified organisations and community initiatives working in humanitarian aid, education, community infrastructure, and food poverty.
+          </p>
 
-          <h2 className="font-heading text-2xl md:text-3xl font-black tracking-wide text-[#E6E2D3] mt-14 mb-6">Why the Drops Are Small</h2>
+          <h2 className="font-heading text-2xl md:text-3xl font-black tracking-wide text-[#E6E2D3] mt-14 mb-6">Why We Craft Limited Collections</h2>
 
-          <motion.p initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }} className="font-body text-lg text-[#E6E2D3]/80 leading-[1.8] mb-8">
-            Each design is produced in a single run of one hundred pieces and never made again. It is not a tactic. It is how a small in-house operation committed to quality actually works, and it means each design remains what it was made to be: a story carried by a specific set of people, not a logo diluted across thousands.
-          </motion.p>
+          <p className="font-body text-lg text-[#E6E2D3]/80 leading-[1.8] mb-8">
+            Each design is produced in a limited edition run and archived once released. It is not a tactic. It is how an in-house operation committed to quality actually works, and it means each design remains what it was made to be: a story carried with meaning by a dedicated community.
+          </p>
 
           <div className="my-16 flex items-center gap-4">
             <div className="flex-1 h-px bg-[#1a1a1a]" />
@@ -88,8 +88,8 @@ export default function About() {
 
           <div className="text-center">
             <p className="font-mono text-xs tracking-[0.3em] text-[#6B6B6B] uppercase mb-6">Explore the Collection</p>
-            <Link to="/collection" className="inline-block bg-[#C4311E] hover:bg-[#a02818] text-[#E6E2D3] px-12 py-4 font-heading font-bold text-sm tracking-[0.3em] uppercase transition-colors">
-              Drop 001 — $50 USD
+            <Link to="/#collection" className="inline-block bg-[#C4311E] hover:bg-[#a02818] text-[#E6E2D3] px-12 py-4 font-heading font-bold text-sm tracking-[0.3em] uppercase transition-colors">
+              Explore Collection
             </Link>
           </div>
         </div>

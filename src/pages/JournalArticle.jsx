@@ -115,7 +115,7 @@ export default function JournalArticle() {
               to="/#collection"
               className="inline-block bg-[#C4311E] hover:bg-[#a02818] text-[#E6E2D3] px-12 py-4 font-heading font-bold text-sm tracking-[0.3em] uppercase transition-colors"
             >
-              Drop 001 — $50 USD
+              Explore Collection
             </Link>
           </div>
 

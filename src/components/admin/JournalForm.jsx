@@ -105,7 +105,7 @@ export default function JournalForm({ article, onClose }) {
             </div>
             <div>
               <label className={labelCls}>Date / Drop Label</label>
-              <input className={inputCls} value={form.date} onChange={set('date')} placeholder="Drop 001 — Journal" />
+              <input className={inputCls} value={form.date} onChange={set('date')} placeholder="Collection — Journal" />
             </div>
           </div>
 

@@ -37,7 +37,11 @@ export function useJournalArticles() {
   return useQuery({
     queryKey: ['journalArticles'],
     queryFn: async () => {
-      return await db.entities.JournalArticle.list();
+      const items = await db.entities.JournalArticle.list();
+      return items.map(a => ({
+        ...a,
+        blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
+      }));
     },
   });
 }

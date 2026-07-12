@@ -14,6 +14,7 @@ const CHARITIES = [
   { name: "Penny Appeal", category: "Food Poverty" },
   { name: "Zakat Foundation", category: "Community Infrastructure" },
   { name: "Human Concern International", category: "Humanitarian Aid" },
+  { name: "Muslim Charity (Custom)", category: "Custom Donation" },
 ];
 const SHIPPING_COST = 10;
 const CHARITY_PER_ITEM = 6;
@@ -42,8 +43,8 @@ export default function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
-    name: "", email: "", address: "", city: "", country: "", zip: "",
-    charity: "", cardNumber: "", cardName: "", expiry: "", cvc: ""
+    name: "", email: "", phone: "", address: "", city: "", country: "", zip: "",
+    charity: "", customCharity: "", cardNumber: "", cardName: "", expiry: "", cvc: ""
   });
 
   useEffect(() => {
@@ -69,25 +70,27 @@ export default function Checkout() {
     return d.length >= 3 ? d.slice(0, 2) + "/" + d.slice(2) : d;
   };
 
-  const canProceedShipping = form.name && form.email && form.address && form.city && form.country && form.zip;
-  const canProceedCharity = !!form.charity;
+  const canProceedShipping = form.name && form.email && form.phone && form.address && form.city && form.country && form.zip;
+  const canProceedCharity = form.charity === "Muslim Charity (Custom)" ? !!form.customCharity?.trim() : !!form.charity;
   const canPlaceOrder = form.cardNumber.replace(/\s/g, "").length === 16 && form.cardName && form.expiry.length === 5 && form.cvc.length >= 3;
 
   const placeOrder = async () => {
     if (!canPlaceOrder) { setError("Please complete all payment fields."); return; }
     setSubmitting(true);
     setError("");
+    const chosenCharity = form.charity === "Muslim Charity (Custom)" ? `Custom: ${form.customCharity}` : form.charity;
     const orderNumber = "REH-" + Date.now().toString().slice(-6);
     const orderData = {
       order_number: orderNumber,
       order_items: items.map(i => ({ product_id: i.slug, product_title: i.title, size: i.size, quantity: i.quantity, price: i.price })),
       customer_name: form.name,
       customer_email: form.email,
+      customer_phone: form.phone || "",
       shipping_address: form.address,
       shipping_city: form.city,
       shipping_country: form.country,
       shipping_zip: form.zip,
-      charity: form.charity,
+      charity: chosenCharity,
       subtotal: subtotal,
       shipping_cost: SHIPPING_COST,
       charity_donation: charityDonation,
@@ -101,6 +104,7 @@ export default function Checkout() {
         items_json: JSON.stringify(orderData.order_items),
         customer_name: orderData.customer_name,
         customer_email: orderData.customer_email,
+        customer_phone: orderData.customer_phone || "",
         shipping_address: orderData.shipping_address,
         shipping_city: orderData.shipping_city,
         shipping_country: orderData.shipping_country,
@@ -168,6 +172,7 @@ export default function Checkout() {
                   <Field label="Full Name" value={form.name} onChange={v => set("name", v)} placeholder="Your name" />
                   <Field label="Email" type="email" value={form.email} onChange={v => set("email", v)} placeholder="you@email.com" />
                 </div>
+                <Field label="Mobile / WhatsApp Number" type="tel" value={form.phone} onChange={v => set("phone", v)} placeholder="+1 (555) 000-0000" />
                 <Field label="Address" value={form.address} onChange={v => set("address", v)} placeholder="Street address" />
                 <div className="grid md:grid-cols-3 gap-4">
                   <Field label="City" value={form.city} onChange={v => set("city", v)} placeholder="City" />
@@ -188,7 +193,7 @@ export default function Checkout() {
             {step === 2 && (
               <div className="space-y-4">
                 <p className="font-body text-sm text-[#E6E2D3]/60 mb-6">
-                  <span className="text-[#C4311E] font-bold">${CHARITY_PER_ITEM}</span> from each shirt goes to a verified cause of your choice. Total donation: <span className="text-[#C4311E] font-bold">${charityDonation}</span>
+                  <span className="text-[#C4311E] font-bold">CA${CHARITY_PER_ITEM}</span> from each shirt goes to a verified cause of your choice. Total donation: <span className="text-[#C4311E] font-bold">CA${charityDonation}</span>
                 </p>
                 {CHARITIES.map(c => (
                   <button
@@ -205,6 +210,18 @@ export default function Checkout() {
                     </div>
                   </button>
                 ))}
+                {form.charity === "Muslim Charity (Custom)" && (
+                  <div className="mt-4 pt-2">
+                    <label className="font-mono text-[10px] tracking-[0.3em] text-[#C4311E] uppercase block mb-2">Specify Custom Charity Details</label>
+                    <textarea
+                      rows={3}
+                      value={form.customCharity || ""}
+                      onChange={e => set("customCharity", e.target.value)}
+                      placeholder="please write complete information where you want from us to donate there"
+                      className="w-full bg-[#0a0a0a] border border-[#C4311E]/40 text-[#E6E2D3] p-4 font-body text-sm focus:outline-none focus:border-[#C4311E] transition-colors resize-none placeholder:text-[#6B6B6B]"
+                    />
+                  </div>
+                )}
                 <div className="flex gap-4 pt-4 items-center">
                   <button onClick={() => setStep(1)} className="font-mono text-xs tracking-[0.3em] text-[#6B6B6B] hover:text-[#E6E2D3] uppercase transition-colors">← Back</button>
                   <button
@@ -241,7 +258,7 @@ export default function Checkout() {
                   >
                     {submitting
                       ? <span className="w-4 h-4 border-2 border-[#E6E2D3] border-t-transparent rounded-full animate-spin" />
-                      : `Place Order — $${total}`}
+                      : `Place Order — CA$${total}`}
                   </button>
                 </div>
               </div>
@@ -259,7 +276,7 @@ export default function Checkout() {
                     <div className="flex-1 flex flex-col justify-center">
                       <p className="font-heading text-xs font-bold text-[#E6E2D3] tracking-wide">{item.title}</p>
                       <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] uppercase mt-1">Size {item.size} — Qty {item.quantity}</p>
-                      <p className="font-body text-xs text-[#E6E2D3]/80 mt-1">${item.price * item.quantity}</p>
+                      <p className="font-body text-xs text-[#E6E2D3]/80 mt-1">CA${item.price * item.quantity}</p>
                     </div>
                   </div>
                 ))}
@@ -267,19 +284,19 @@ export default function Checkout() {
               <div className="space-y-2 pt-4 border-t border-[#1a1a1a]">
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Subtotal</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">${subtotal}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">CA${subtotal}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Shipping</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">${SHIPPING_COST}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">CA${SHIPPING_COST}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Charity</span>
-                  <span className="font-body text-sm text-[#C4311E]">${charityDonation}</span>
+                  <span className="font-body text-sm text-[#C4311E]">CA${charityDonation}</span>
                 </div>
                 <div className="flex justify-between pt-3 mt-3 border-t border-[#1a1a1a]">
                   <span className="font-heading text-sm font-bold text-[#E6E2D3]">Total</span>
-                  <span className="font-heading text-xl font-black text-[#C4311E]">${total}</span>
+                  <span className="font-heading text-xl font-black text-[#C4311E]">CA${total}</span>
                 </div>
               </div>
             </div>

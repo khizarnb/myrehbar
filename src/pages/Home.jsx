@@ -50,13 +50,12 @@ export default function Home() {
               The Manifesto
             </p>
             <blockquote className="font-heading text-2xl md:text-4xl font-light text-[#E6E2D3] leading-relaxed tracking-wide">
-              "This is not a clothing brand. It is a quarterly act of community expressed through apparel."
+              "This is not just a clothing brand. It is an act of community expressed through apparel."
             </blockquote>
             <div className="mt-10 space-y-3">
               <p className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B]">EVERY DESIGN IS A STORY</p>
-              <p className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B]">100 UNITS EACH — THEN GONE FOREVER</p>
-              <p className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B]">$6 FROM EVERY PURCHASE TO CHARITY</p>
-              <p className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B]">ANONYMOUS MUSLIM ARTIST — PAID ROYALTY</p>
+              <p className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B]">LIMITED EDITION — CRAFTED WITH PURPOSE</p>
+              <p className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B]">COMMUNITY SUPPORTED DIRECT CHARITY</p>
             </div>
           </motion.div>
         </div>

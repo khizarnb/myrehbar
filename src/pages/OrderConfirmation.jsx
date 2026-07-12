@@ -61,7 +61,7 @@ export default function OrderConfirmation() {
                   <p className="font-heading text-sm font-bold text-[#E6E2D3]">{item.product_title}</p>
                   <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] uppercase mt-1">Size {item.size} — Qty {item.quantity}</p>
                 </div>
-                <p className="font-heading text-sm text-[#E6E2D3]">${item.price * item.quantity}</p>
+                <p className="font-heading text-sm text-[#E6E2D3]">CA${item.price * item.quantity}</p>
               </div>
             ))}
           </div>
@@ -70,19 +70,19 @@ export default function OrderConfirmation() {
           <div className="space-y-3 pt-6 border-t border-[#1a1a1a]">
             <div className="flex justify-between">
               <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Subtotal</span>
-              <span className="font-body text-sm text-[#E6E2D3]">${order.subtotal}</span>
+              <span className="font-body text-sm text-[#E6E2D3]">CA${order.subtotal}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Shipping</span>
-              <span className="font-body text-sm text-[#E6E2D3]">${order.shipping_cost}</span>
+              <span className="font-body text-sm text-[#E6E2D3]">CA${order.shipping_cost}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Charity Donation</span>
-              <span className="font-body text-sm text-[#C4311E]">${order.charity_donation}</span>
+              <span className="font-body text-sm text-[#C4311E]">CA${order.charity_donation}</span>
             </div>
             <div className="flex justify-between pt-3 border-t border-[#1a1a1a]">
               <span className="font-heading text-base font-bold text-[#E6E2D3]">Total</span>
-              <span className="font-heading text-xl font-black text-[#C4311E]">${order.total}</span>
+              <span className="font-heading text-xl font-black text-[#C4311E]">CA${order.total}</span>
             </div>
           </div>
         </div>
@@ -92,6 +92,7 @@ export default function OrderConfirmation() {
           <div className="border border-[#1a1a1a] p-6">
             <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase mb-3">Shipping To</p>
             <p className="font-body text-sm text-[#E6E2D3]/80">{order.customer_name}</p>
+            {order.customer_phone && <p className="font-mono text-xs text-[#C4311E]">{order.customer_phone}</p>}
             <p className="font-body text-sm text-[#E6E2D3]/60">{order.shipping_address}</p>
             <p className="font-body text-sm text-[#E6E2D3]/60">{order.shipping_city}, {order.shipping_country} {order.shipping_zip}</p>
           </div>

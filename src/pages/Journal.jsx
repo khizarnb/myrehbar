@@ -58,7 +58,7 @@ export default function Journal() {
       {/* Design stories */}
       <section className="px-6 md:px-16 py-16 border-t border-[#1a1a1a]">
         <div className="max-w-6xl mx-auto">
-          <p className="font-mono text-[10px] tracking-[0.4em] text-[#6B6B6B] uppercase mb-8">Design Stories — Drop 001</p>
+          <p className="font-mono text-[10px] tracking-[0.4em] text-[#6B6B6B] uppercase mb-8">Design Stories — Collection</p>
           <div className="grid md:grid-cols-3 gap-6">
             {(products || []).map(product => (
               <Link key={product.id} to={`/article/${product.slug}`} className="group block border border-[#1a1a1a] hover:border-[#C4311E] transition-colors overflow-hidden">

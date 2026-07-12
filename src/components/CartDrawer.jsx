@@ -53,7 +53,7 @@ export default function CartDrawer() {
                   <div className="flex-1 flex flex-col">
                     <h3 className="font-heading text-sm font-bold tracking-wider text-[#E6E2D3]">{item.title}</h3>
                     <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] uppercase mt-1">SIZE {item.size}</p>
-                    <p className="font-heading text-sm text-[#C4311E] mt-1">${item.price}</p>
+                    <p className="font-heading text-sm text-[#C4311E] mt-1">CA${item.price}</p>
                     <div className="mt-auto flex items-center justify-between">
                       <div className="flex items-center gap-2 border border-[#1a1a1a]">
                         <button
@@ -89,10 +89,10 @@ export default function CartDrawer() {
           <div className="border-t border-[#1a1a1a] px-6 py-5">
             <div className="flex justify-between mb-3">
               <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Subtotal</span>
-              <span className="font-heading text-lg font-bold text-[#E6E2D3]">${subtotal}</span>
+              <span className="font-heading text-lg font-bold text-[#E6E2D3]">CA${subtotal}</span>
             </div>
             <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] mb-4">
-              $6 from each shirt goes to your chosen charity. Shipping calculated at checkout.
+              A portion from each item goes to your chosen charity. Shipping calculated at checkout.
             </p>
             <button
               onClick={goToCheckout}

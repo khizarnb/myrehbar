@@ -27,10 +27,10 @@ export default function Footer() {
                 className="h-16 w-auto mb-8"
               />
               <p className="font-body text-[#E6E2D3]/80 text-lg leading-relaxed max-w-md">
-                A quarterly act of community expressed through apparel. Every design is a story. 100 each. $6 to charity. Then they're gone.
+                An act of community expressed through apparel. Every design is a story crafted with meaning and purpose.
               </p>
               <div className="mt-8 font-mono text-xs tracking-[0.2em] text-[#E6E2D3]/50 uppercase">
-                Q1 2026 — Drop 001
+                REHBAR — COLLECTION
               </div>
             </div>
 

@@ -77,7 +77,7 @@ export default function AdminProducts() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-mono text-sm text-[#E6E2D3]">${p.price}</td>
+                  <td className="px-6 py-4 font-mono text-sm text-[#E6E2D3]">CA${p.price}</td>
                   <td className="px-6 py-4">
                     <input
                       type="number"

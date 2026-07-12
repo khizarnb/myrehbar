@@ -104,7 +104,7 @@ export default function ProductForm({ product, onClose }) {
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className={labelCls}>Price (USD)</label>
+              <label className={labelCls}>Price (CA$)</label>
               <input type="number" className={inputCls} value={form.price} onChange={set('price')} required />
             </div>
             <div>

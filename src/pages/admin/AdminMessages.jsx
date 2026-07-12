@@ -2,7 +2,7 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Mail, Trash2, CheckCircle, Clock, ExternalLink, MessageSquare, User, Calendar } from "lucide-react";
+import { Mail, Trash2, CheckCircle, Clock, ExternalLink, MessageSquare, User, Calendar, Phone } from "lucide-react";
 
 export default function AdminMessages() {
   const queryClient = useQueryClient();
@@ -84,7 +84,8 @@ export default function AdminMessages() {
                       </span>
                     )}
                   </div>
-                  <p className="font-mono text-xs text-[#6B6B6B] truncate mb-2">{item.email}</p>
+                  <p className="font-mono text-xs text-[#6B6B6B] truncate mb-1">{item.email}</p>
+                  {item.phone && <p className="font-mono text-[11px] text-[#C4311E] truncate mb-2 flex items-center gap-1"><Phone size={11}/> {item.phone}</p>}
                   <p className="font-body text-xs text-[#E6E2D3]/70 line-clamp-2">{item.message}</p>
                   <div className="mt-3 flex items-center justify-between text-[10px] font-mono text-[#6B6B6B]">
                     <span>{new Date(item.created_at || Date.now()).toLocaleDateString()}</span>
@@ -104,12 +105,22 @@ export default function AdminMessages() {
                       <User size={16} className="text-[#C4311E]" />
                       <h2 className="font-heading text-xl font-bold text-[#E6E2D3]">{selectedMessage.name}</h2>
                     </div>
-                    <a
-                      href={`mailto:${selectedMessage.email}`}
-                      className="font-mono text-xs text-[#C4311E] hover:underline flex items-center gap-1.5"
-                    >
-                      <Mail size={13} /> {selectedMessage.email}
-                    </a>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-1">
+                      <a
+                        href={`mailto:${selectedMessage.email}`}
+                        className="font-mono text-xs text-[#C4311E] hover:underline flex items-center gap-1.5"
+                      >
+                        <Mail size={13} /> {selectedMessage.email}
+                      </a>
+                      {selectedMessage.phone && (
+                        <a
+                          href={`tel:${selectedMessage.phone}`}
+                          className="font-mono text-xs text-[#E6E2D3]/80 hover:underline flex items-center gap-1.5"
+                        >
+                          <Phone size={13} /> {selectedMessage.phone}
+                        </a>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <button

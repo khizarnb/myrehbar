@@ -17,6 +17,8 @@ import Contact from '@/pages/Contact';
 import FAQ from '@/pages/FAQ';
 import Checkout from '@/pages/Checkout';
 import OrderConfirmation from '@/pages/OrderConfirmation';
+import Privacy from '@/pages/Privacy';
+import Terms from '@/pages/Terms';
 import { CartProvider } from '@/lib/CartContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -59,6 +61,8 @@ const AuthenticatedApp = () => {
       <Route path="/faq" element={<FAQ />} />
       <Route path="/journal" element={<Journal />} />
       <Route path="/journal/:slug" element={<JournalArticle />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/order-confirmation/:orderNumber" element={<OrderConfirmation />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>

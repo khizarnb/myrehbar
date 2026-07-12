@@ -12,35 +12,35 @@ const FAQS = [
   },
   {
     q: "How much goes to charity and who chooses the charity?",
-    a: "From every shirt sold, $6 USD goes to a charity of your choosing at checkout. We partner with verified organisations working in humanitarian aid, education, community infrastructure, and food poverty. Every donation is logged publicly with receipts."
+    a: "From every shirt sold, a direct donation (CA$6) goes to a charity of your choosing at checkout. We partner with verified organisations working in humanitarian aid, education, community infrastructure, and food poverty. You can also specify any custom Muslim charity at checkout."
   },
   {
     q: "Where are the shirts made?",
-    a: "Every Rehbar shirt begins as yarn in our own facility in Pakistan. We knit the fabric, cut it, sew it, and print it in-house. This is how we guarantee consistent quality and fabric that holds up wash after wash."
+    a: "Every Rehbar shirt begins as yarn in our global studio facility. We knit the fabric, cut it, sew it, and print it in-house. This is how we guarantee consistent quality and fabric that holds up wash after wash."
   },
   {
     q: "What are the shirt specifications?",
-    a: "All shirts are 100% premium heavyweight cotton at 280 GSM with a relaxed oversized fit. Prints are either screen printed or DTG digital depending on the design. Each shirt is individually numbered."
+    a: "All shirts are 100% premium heavyweight cotton at 280 GSM with a relaxed oversized fit. Prints are either screen printed or DTG digital depending on the design. Each piece is crafted with purpose and care."
   },
   {
     q: "How do I know what size to order?",
-    a: "Our shirts have a relaxed oversized fit. If you prefer a standard fit, order your usual size. For a more fitted look, consider sizing down. All sizes (S–XXL) are available unless a particular size has sold out within the 100-unit run."
+    a: "Our shirts have a relaxed oversized fit. If you prefer a standard fit, order your usual size. For a more fitted look, consider sizing down. All sizes (S–XXL) are available unless a particular size has sold out within the limited release."
   },
   {
     q: "How much is shipping and how long does it take?",
-    a: "Shipping is $10 USD flat rate. Orders are processed within 1–2 business days and typically arrive within 5–10 business days depending on your location."
+    a: "Shipping is CA$10 flat rate. Orders are processed within 1–2 business days and typically arrive within 5–10 business days depending on your location."
   },
   {
     q: "What is your return policy?",
-    a: "Due to the limited-edition nature of each drop, all sales are final. If your shirt arrives damaged or defective, contact us at sales@myrehbar.com within 7 days of receiving your order and we will make it right."
+    a: "Due to the limited-edition nature of each release, all sales are final. If your shirt arrives damaged or defective, contact us at sales@myrehbar.com within 7 days of receiving your order and we will make it right."
   },
   {
     q: "Who designs the artwork?",
-    a: "Our designs are created by trained calligraphers and designers from within the community. We credit them as a collective and keep them anonymous by their preference, because the spotlight belongs to the story and the wearer, not a name on a label."
+    a: "Our designs are created by talented calligraphers and designers from across the globe. We celebrate their craftsmanship, because the spotlight belongs to the story and the wearer."
   },
   {
-    q: "Will there be more drops?",
-    a: "Yes. Rehbar is a quarterly act of community. Each quarter brings a new collection with new stories. Sign up for the newsletter at the bottom of the page to be notified before each drop."
+    q: "Will there be more collections?",
+    a: "Yes. Rehbar is an act of community. Each release brings a new collection with new stories. Sign up for the newsletter at the bottom of the page to be notified before each collection."
   },
   {
     q: "How can I contact you?",

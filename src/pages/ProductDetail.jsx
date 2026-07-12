@@ -96,7 +96,7 @@ export default function ProductDetail() {
           <div className="max-w-lg">
             {/* Metadata */}
             <p className="font-mono text-[10px] tracking-[0.4em] text-[#6B6B6B] uppercase mb-4">
-              Limited Edition — {product.edition} Units — Q1 2026
+              Limited Edition — Collection
             </p>
 
             <h1 className="font-heading text-5xl md:text-6xl font-black tracking-[0.1em] text-[#E6E2D3] leading-none">
@@ -107,8 +107,8 @@ export default function ProductDetail() {
             </p>
 
             <div className="mt-8 mb-10">
-              <span className="font-heading text-4xl font-black text-[#C4311E]">${product.price}</span>
-              <span className="font-mono text-xs text-[#6B6B6B] ml-2 tracking-wider">USD</span>
+              <span className="font-heading text-4xl font-black text-[#C4311E]">CA${product.price}</span>
+              <span className="font-mono text-xs text-[#6B6B6B] ml-2 tracking-wider">CA</span>
             </div>
 
             {/* Description */}

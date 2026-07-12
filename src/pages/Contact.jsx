@@ -17,7 +17,7 @@ const generateCaptcha = () => {
 };
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [captcha, setCaptcha] = useState(generateCaptcha);
   const [captchaInput, setCaptchaInput] = useState("");
   const [captchaError, setCaptchaError] = useState("");
@@ -45,12 +45,13 @@ export default function Contact() {
         await db.entities.ContactMessage.create({
           name: form.name,
           email: form.email,
+          phone: form.phone || "",
           message: form.message,
           created_at: new Date().toISOString(),
           read: false
         });
         setSubmitted(true);
-        setForm({ name: "", email: "", message: "" });
+        setForm({ name: "", email: "", phone: "", message: "" });
         refreshCaptcha();
       } catch (err) {
         setCaptchaError("Failed to submit message. Please try again later.");
@@ -100,7 +101,7 @@ export default function Contact() {
               </div>
               <div>
                 <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase mb-2">Studio</p>
-                <p className="font-body text-lg text-[#E6E2D3]/80">In-house facility<br />Pakistan</p>
+                <p className="font-body text-lg text-[#E6E2D3]/80">Global Studio Facility<br />Worldwide</p>
               </div>
             </div>
 
@@ -151,6 +152,16 @@ export default function Contact() {
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     required
                     placeholder="you@example.com"
+                    className="w-full bg-[#111] border border-[#1a1a1a] text-[#E6E2D3] px-5 py-3 font-body text-sm focus:outline-none focus:border-[#C4311E] transition-colors placeholder:text-[#444]"
+                  />
+                </div>
+                <div>
+                  <label className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase block mb-3">Phone / WhatsApp Number</label>
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    placeholder="+1 (555) 000-0000"
                     className="w-full bg-[#111] border border-[#1a1a1a] text-[#E6E2D3] px-5 py-3 font-body text-sm focus:outline-none focus:border-[#C4311E] transition-colors placeholder:text-[#444]"
                   />
                 </div>

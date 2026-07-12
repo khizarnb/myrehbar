@@ -51,8 +51,9 @@ export default function AdminOrders() {
                   <td className="px-6 py-4">
                     <p className="font-body text-sm text-[#E6E2D3]">{o.customer_name}</p>
                     <p className="font-mono text-xs text-[#6B6B6B]">{o.customer_email}</p>
+                    {o.customer_phone && <p className="font-mono text-[11px] text-[#C4311E] mt-0.5">{o.customer_phone}</p>}
                   </td>
-                  <td className="px-6 py-4 font-mono text-sm text-[#C4311E]">${o.total}</td>
+                  <td className="px-6 py-4 font-mono text-sm text-[#C4311E]">CA${o.total}</td>
                   <td className="px-6 py-4">
                     <select
                       value={o.status || 'pending'}
@@ -93,6 +94,7 @@ export default function AdminOrders() {
                 <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase mb-2">Customer</p>
                 <p className="font-body text-sm text-[#E6E2D3]">{viewing.customer_name}</p>
                 <p className="font-body text-sm text-[#E6E2D3]/70">{viewing.customer_email}</p>
+                {viewing.customer_phone && <p className="font-mono text-xs text-[#C4311E] mt-1">Phone/WhatsApp: {viewing.customer_phone}</p>}
               </div>
               <div>
                 <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase mb-2">Shipping Address</p>
@@ -107,15 +109,15 @@ export default function AdminOrders() {
                 {parseItems(viewing).map((item, i) => (
                   <div key={i} className="flex justify-between py-2">
                     <span className="font-body text-sm text-[#E6E2D3]">{item.product_title} — Size {item.size} ×{item.quantity}</span>
-                    <span className="font-mono text-sm text-[#E6E2D3]/70">${item.price * item.quantity}</span>
+                    <span className="font-mono text-sm text-[#E6E2D3]/70">CA${item.price * item.quantity}</span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-[#1a1a1a] pt-4 space-y-1">
-                <div className="flex justify-between"><span className="font-mono text-xs text-[#6B6B6B]">Subtotal</span><span className="font-mono text-sm text-[#E6E2D3]">${viewing.subtotal}</span></div>
-                <div className="flex justify-between"><span className="font-mono text-xs text-[#6B6B6B]">Shipping</span><span className="font-mono text-sm text-[#E6E2D3]">${viewing.shipping_cost}</span></div>
-                <div className="flex justify-between"><span className="font-mono text-xs text-[#6B6B6B]">Charity</span><span className="font-mono text-sm text-[#C4311E]">${viewing.charity_donation}</span></div>
-                <div className="flex justify-between pt-2"><span className="font-heading text-sm font-bold text-[#E6E2D3]">Total</span><span className="font-heading text-sm font-bold text-[#C4311E]">${viewing.total}</span></div>
+                <div className="flex justify-between"><span className="font-mono text-xs text-[#6B6B6B]">Subtotal</span><span className="font-mono text-sm text-[#E6E2D3]">CA${viewing.subtotal}</span></div>
+                <div className="flex justify-between"><span className="font-mono text-xs text-[#6B6B6B]">Shipping</span><span className="font-mono text-sm text-[#E6E2D3]">CA${viewing.shipping_cost}</span></div>
+                <div className="flex justify-between"><span className="font-mono text-xs text-[#6B6B6B]">Charity</span><span className="font-mono text-sm text-[#C4311E]">CA${viewing.charity_donation}</span></div>
+                <div className="flex justify-between pt-2"><span className="font-heading text-sm font-bold text-[#E6E2D3]">Total</span><span className="font-heading text-sm font-bold text-[#C4311E]">CA${viewing.total}</span></div>
               </div>
             </div>
           </div>

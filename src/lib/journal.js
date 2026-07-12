@@ -8,7 +8,7 @@ export const journalArticles = [
     "metaTitle": "Why We Built Rehbar",
     "excerpt": "Rehbar means leader. Here is why we built a clothing brand around that word, who it is for, and what every shirt is meant to carry.",
     "image": "/images/homepage-banner.webp",
-    "date": "Drop 001 — Journal",
+    "date": "Collection — Journal",
     "blocks": [
       {
         "type": "paragraph",
@@ -56,11 +56,11 @@ export const journalArticles = [
       },
       {
         "type": "paragraph",
-        "text": "Every Rehbar shirt begins as yarn in our own facility in Pakistan. We knit the fabric, cut it, sew it, and print it. We did not choose this because it is easy. We chose it because it is the only way to control what actually matters to the person wearing the shirt: fabric that feels the same in the tenth wash as the first, print that does not crack, a fit we can hold consistent from drop to drop because no anonymous factory sits between our intention and your wardrobe."
+        "text": "Every Rehbar shirt begins as yarn in our Global Studio Facility. We knit the fabric, cut it, sew it, and print it. We did not choose this because it is easy. We chose it because it is the only way to control what actually matters to the person wearing the shirt: fabric that feels the same in the tenth wash as the first, print that does not crack, a fit we can hold consistent across every collection because no anonymous factory sits between our intention and your wardrobe."
       },
       {
         "type": "paragraph",
-        "text": "It also means the craft lives where much of our audience has roots. The artists who create our designs are trained calligraphers and designers from within the community. We credit them as a collective and keep them anonymous by their preference and ours, because the spotlight in this brand points at the story and at the wearer, never at a name on a label."
+        "text": "It also means the craft lives where much of our audience has roots. Our creative collective of calligraphers and designers focus entirely on precision and artistry. We keep the spotlight on the story and the wearer, never at a name on a label."
       },
       {
         "type": "paragraph",
@@ -76,11 +76,11 @@ export const journalArticles = [
       },
       {
         "type": "heading",
-        "text": "Why the drops are small"
+        "text": "Why the collections are exclusive"
       },
       {
         "type": "paragraph",
-        "text": "Each design is produced in a single run of one hundred pieces and never made again. We want to be straightforward about why. It is not a tactic. It is how a small in-house operation committed to quality actually works, and it means each design remains what it was made to be: a story carried by a specific set of people, not a logo diluted across thousands."
+        "text": "Each design is produced in limited exclusive runs and crafted with uncompromising standards. We want to be straightforward about why. It is how a dedicated in-house operation committed to quality works best, ensuring each design remains what it was made to be: a story carried with conviction and pride."
       },
       {
         "type": "heading",
@@ -88,11 +88,11 @@ export const journalArticles = [
       },
       {
         "type": "paragraph",
-        "text": "Drop 001 carries three stories. One is our name and the standard it sets. One is the title earned by a man chosen for the sincerity of his heart when every other attempt had failed. One is the help that came from the sky when a community stood firm against an army it could not fight."
+        "text": "The Collection carries three stories. One is our name and the standard it sets. One is the title earned by a man chosen for the sincerity of his heart when every other attempt had failed. One is the help that came from the sky when a community stood firm against an army it could not fight."
       },
       {
         "type": "paragraph",
-        "text": "Read them. They were yours before we ever printed them. We just gave them a form you can wear.\n\nExplore Drop 001 and the stories behind each design in the journal."
+        "text": "Read them. They were yours before we ever printed them. We just gave them a form you can wear.\n\nExplore our Collection and the stories behind each design in the journal."
       }
     ]
   }

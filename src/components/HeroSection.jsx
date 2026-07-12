@@ -37,12 +37,12 @@ export default function HeroSection() {
             className="text-center"
           >
             <p className="font-mono text-xs md:text-sm tracking-[0.4em] text-[#6B6B6B] uppercase mb-4">
-              Drop 001 — Only 100 Each
+              Collection — Limited Edition
             </p>
             <p className="font-body text-lg md:text-xl text-[#E6E2D3]/70 max-w-lg mx-auto leading-relaxed">
               Apparel for people who lead with purpose.
               <br />
-              Every design is a story. $50 each. $6 to charity.
+              Every design is a story. Crafted with meaning.
             </p>
           </motion.div>
         </div>
@@ -62,7 +62,7 @@ export default function HeroSection() {
       {/* Vertical metadata strip */}
       <div className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 hidden md:block">
         <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] writing-mode-vertical rotate-180" style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}>
-          REHBAR — رهبر — Q1.2026 — DROP.001 — TORONTO.CA
+          REHBAR — رهبر — COLLECTION — TORONTO.CA
         </p>
       </div>
 
