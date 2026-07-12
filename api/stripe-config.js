@@ -8,6 +8,6 @@ export default async function handler(req, res) {
     return;
   }
 
-  const publishableKey = process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
+  const publishableKey = (process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY || "").trim();
   return res.status(200).json({ publishableKey });
 }
