@@ -4,13 +4,11 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
-import { useCurrency } from "@/lib/CurrencyContext";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { cartCount, setIsCartOpen } = useCart();
-  const { currency, setCurrency, availableCurrencies } = useCurrency();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 100);
@@ -39,21 +37,7 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="relative flex items-center">
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="bg-transparent border border-[#333] hover:border-[#C4311E] text-[#E6E2D3] font-mono text-[11px] tracking-[0.1em] uppercase px-2 py-1.5 focus:outline-none transition-colors cursor-pointer"
-              >
-                {availableCurrencies?.map((c) => (
-                  <option key={c.code} value={c.code} className="bg-[#0F0F0F] text-[#E6E2D3]">
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button onClick={() => setIsCartOpen(true)} className="relative text-[#E6E2D3] hover:text-[#C4311E] transition-colors ml-2">
+            <button onClick={() => setIsCartOpen(true)} className="relative text-[#E6E2D3] hover:text-[#C4311E] transition-colors">
               <ShoppingBag size={20} />
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 w-5 h-5 bg-[#C4311E] text-[#E6E2D3] text-[10px] font-bold flex items-center justify-center rounded-full">

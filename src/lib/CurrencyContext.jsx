@@ -39,9 +39,6 @@ export const CURRENCIES = {
 function detectRegionCurrency() {
   if (typeof window === "undefined") return "CAD";
   try {
-    const saved = localStorage.getItem("__rehbar_currency__");
-    if (saved && CURRENCIES[saved]) return saved;
-
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
     if (timeZone.startsWith("Europe/London") || timeZone.includes("Belfast")) return "GBP";
     if (timeZone.startsWith("Europe/")) return "EUR";
