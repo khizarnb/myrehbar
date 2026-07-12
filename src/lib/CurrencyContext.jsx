@@ -39,13 +39,25 @@ export const CURRENCIES = {
 function detectRegionCurrency() {
   if (typeof window === "undefined") return "CAD";
   try {
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-    if (timeZone.startsWith("Europe/London") || timeZone.includes("Belfast")) return "GBP";
-    if (timeZone.startsWith("Europe/")) return "EUR";
-    if (timeZone.startsWith("America/Toronto") || timeZone.startsWith("America/Vancouver") || timeZone.startsWith("America/Edmonton") || timeZone.startsWith("America/Winnipeg") || timeZone.startsWith("America/Halifax") || timeZone.startsWith("America/St_Johns") || timeZone.includes("Canada")) {
+    const timeZone = (Intl.DateTimeFormat().resolvedOptions().timeZone || "").toLowerCase();
+    const lang = (navigator.language || (navigator.languages && navigator.languages[0]) || "").toLowerCase();
+
+    // 1. United Kingdom check
+    if (timeZone.startsWith("europe/london") || timeZone.includes("belfast") || lang.endsWith("-gb") || lang === "en-gb") {
+      return "GBP";
+    }
+    // 2. Europe check
+    if (timeZone.startsWith("europe/") || lang.endsWith("-de") || lang.endsWith("-fr") || lang.endsWith("-it") || lang.endsWith("-es") || lang.endsWith("-nl")) {
+      return "EUR";
+    }
+    // 3. Canada check
+    if (timeZone.startsWith("america/toronto") || timeZone.startsWith("america/vancouver") || timeZone.startsWith("america/edmonton") || timeZone.startsWith("america/winnipeg") || timeZone.startsWith("america/halifax") || timeZone.startsWith("america/st_johns") || timeZone.includes("canada") || lang.endsWith("-ca")) {
       return "CAD";
     }
-    if (timeZone.startsWith("America/")) return "USD"; // Default Americas outside Canada to USD
+    // 4. United States & Americas outside Canada
+    if (timeZone.startsWith("america/") || lang.endsWith("-us") || lang === "en-us") {
+      return "USD";
+    }
   } catch (e) {
     console.error("Error detecting region currency:", e);
   }
