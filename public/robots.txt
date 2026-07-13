@@ -1,3 +1,0 @@
-# Block all web crawlers while website is in staging / pre-launch
-User-agent: *
-Disallow: /

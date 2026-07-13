@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useCurrency } from "@/lib/CurrencyContext";
 
 export default function ProductCard({ product, index }) {
   const [hovered, setHovered] = useState(false);
-  const { formatPrice, currency } = useCurrency();
 
   return (
     <motion.section
@@ -18,7 +16,7 @@ export default function ProductCard({ product, index }) {
       {/* Vertical metadata strip */}
       <div className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 hidden md:block z-10">
         <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B]" style={{ writingMode: "vertical-lr" }}>
-          {product.title} — {product.subtitle} — COLLECTION — {formatPrice(product.price)}
+          {product.title} — {product.subtitle} — COLLECTION — CA${product.price}
         </p>
       </div>
 
@@ -55,9 +53,9 @@ export default function ProductCard({ product, index }) {
               </div>
               <div className="text-right">
                 <p className="font-heading text-3xl md:text-4xl font-black text-[#C4311E]">
-                  {formatPrice(product.price)}
+                  CA${product.price}
                 </p>
-                <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] uppercase mt-1">{currency}</p>
+                <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] uppercase mt-1">CA</p>
               </div>
             </div>
           </div>

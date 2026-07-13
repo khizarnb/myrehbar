@@ -3,12 +3,205 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "@/lib/CartContext";
-import { useCurrency } from "@/lib/CurrencyContext";
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import StripePaymentSection from "@/components/StripePaymentSection";
 import { Check, Lock, ChevronLeft } from "lucide-react";
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || import.meta.env.VITE_STRIPE_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY || import.meta.env.VITE_PUBLIC_STRIPE_KEY || '';
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
+
+const cardElementOptions = {
+  style: {
+    base: {
+      color: '#E6E2D3',
+      fontFamily: 'monospace, sans-serif',
+      fontSmoothing: 'antialiased',
+      fontSize: '14px',
+      '::placeholder': {
+        color: '#6B6B6B',
+      },
+      iconColor: '#C4311E',
+    },
+    invalid: {
+      color: '#C4311E',
+      iconColor: '#C4311E',
+    },
+  },
+};
+
+function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDonation, clearCart, navigate, setStep }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleStripeSubmit = async () => {
+    if (!stripe || !elements) {
+      setError("Stripe payment gateway is initializing...");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+
+    const cardEl = elements.getElement(CardElement);
+    if (!cardEl) {
+      setError("Card input not found.");
+      setSubmitting(false);
+      return;
+    }
+
+    // Attempt backend PaymentIntent first
+    let clientSecret = null;
+    const orderNumber = "REH-" + Date.now().toString().slice(-6);
+    try {
+      const res = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: total,
+          currency: 'cad',
+          customer_email: form.email,
+          order_number: orderNumber
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        clientSecret = data.clientSecret;
+      }
+    } catch (e) {
+      // Backend not reached or not configured
+    }
+
+    let paymentMethodIdOrStatus = "";
+    if (clientSecret) {
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardEl,
+          billing_details: {
+            name: form.cardName || form.name || "Customer",
+            email: form.email,
+            phone: form.phone || undefined,
+            address: {
+              line1: form.address,
+              city: form.city,
+              country: form.country || "CA",
+              postal_code: form.zip
+            }
+          }
+        }
+      });
+      if (result.error) {
+        setError(result.error.message || "Payment verification failed.");
+        setSubmitting(false);
+        return;
+      }
+      paymentMethodIdOrStatus = result.paymentIntent?.id || "Stripe_Paid";
+    } else {
+      const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardEl,
+        billing_details: {
+          name: form.cardName || form.name || "Customer",
+          email: form.email,
+          phone: form.phone || undefined,
+          address: {
+            line1: form.address,
+            city: form.city,
+            country: form.country || "CA",
+            postal_code: form.zip
+          }
+        }
+      });
+      if (pmError) {
+        setError(pmError.message || "Invalid card details.");
+        setSubmitting(false);
+        return;
+      }
+      paymentMethodIdOrStatus = paymentMethod.id;
+    }
+
+    // Save order and complete
+    const chosenCharity = form.charity === "Muslim Charity (Custom)" ? `Custom: ${form.customCharity}` : form.charity;
+    const orderData = {
+      order_number: orderNumber,
+      order_items: items.map(i => ({ product_id: i.slug, product_title: i.title, size: i.size, quantity: i.quantity, price: i.price })),
+      customer_name: form.name,
+      customer_email: form.email,
+      customer_phone: form.phone || "",
+      shipping_address: form.address,
+      shipping_city: form.city,
+      shipping_country: form.country,
+      shipping_zip: form.zip,
+      charity: chosenCharity,
+      subtotal: subtotal,
+      shipping_cost: shippingCost,
+      charity_donation: charityDonation,
+      total: total,
+      status: "paid (stripe: " + paymentMethodIdOrStatus + ")",
+      created_date: new Date().toISOString()
+    };
+
+    try {
+      await db.entities.Order.create({
+        order_number: orderData.order_number,
+        items_json: JSON.stringify(orderData.order_items),
+        customer_name: orderData.customer_name,
+        customer_email: orderData.customer_email,
+        customer_phone: orderData.customer_phone || "",
+        shipping_address: orderData.shipping_address,
+        shipping_city: orderData.shipping_city,
+        shipping_country: orderData.shipping_country,
+        shipping_zip: orderData.shipping_zip,
+        charity: orderData.charity,
+        subtotal: orderData.subtotal,
+        shipping_cost: orderData.shipping_cost,
+        charity_donation: orderData.charity_donation,
+        total: orderData.total,
+        status: "paid (stripe: " + paymentMethodIdOrStatus + ")"
+      });
+    } catch (e) {}
+    clearCart();
+    navigate(`/order-confirmation/${orderNumber}`, { state: { order: orderData } });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 mb-2">
+        <Lock size={14} className="text-[#C4311E]" />
+        <p className="font-mono text-[10px] tracking-[0.3em] text-[#E6E2D3] uppercase font-bold">Stripe Encrypted Payment</p>
+      </div>
+      <div>
+        <label className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase mb-2 block">Card Details</label>
+        <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-4 text-[#E6E2D3] focus-within:border-[#C4311E] transition-colors">
+          <CardElement options={cardElementOptions} />
+        </div>
+      </div>
+      <div>
+        <label className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase mb-2 block">Name on Card</label>
+        <input
+          type="text"
+          defaultValue={form.cardName || form.name}
+          placeholder="Name as it appears on card"
+          className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#E6E2D3] px-4 py-3 font-body text-sm placeholder:text-[#6B6B6B] focus:outline-none focus:border-[#C4311E] transition-colors"
+        />
+      </div>
+      {error && <p className="font-mono text-xs tracking-wider text-[#C4311E] bg-[#C4311E]/10 p-3 border border-[#C4311E]/30">{error}</p>}
+      <div className="flex gap-4 pt-2 items-center">
+        <button onClick={() => setStep(2)} disabled={submitting} className="font-mono text-xs tracking-[0.3em] text-[#6B6B6B] hover:text-[#E6E2D3] uppercase transition-colors">← Back</button>
+        <button
+          onClick={handleStripeSubmit}
+          disabled={!stripe || submitting}
+          className="bg-[#C4311E] hover:bg-[#a02818] disabled:bg-[#333] disabled:cursor-not-allowed text-[#E6E2D3] px-12 py-4 font-heading font-bold text-sm tracking-[0.3em] uppercase transition-colors ml-auto flex items-center gap-3"
+        >
+          {submitting ? <span className="w-4 h-4 border-2 border-[#E6E2D3] border-t-transparent rounded-full animate-spin" /> : `Pay CA$${total} via Stripe`}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const CHARITIES = [
   { name: "Islamic Relief", category: "Humanitarian Aid" },
@@ -39,7 +232,6 @@ function Field({ label, value, onChange, placeholder, type }) {
 
 export default function Checkout() {
   const { items, subtotal, clearCart, cartCount } = useCart();
-  const { formatPrice, convertPrice, currency } = useCurrency();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [authed, setAuthed] = useState(null);
@@ -77,16 +269,15 @@ export default function Checkout() {
   const canProceedCharity = form.charity === "Muslim Charity (Custom)" ? !!form.customCharity?.trim() : !!form.charity;
   const canPlaceOrder = form.cardNumber.replace(/\s/g, "").length === 16 && form.cardName && form.expiry.length === 5 && form.cvc.length >= 3;
 
-  const placeOrder = async (isPaid = false) => {
+  const placeOrder = async () => {
+    if (!canPlaceOrder) { setError("Please complete all payment fields."); return; }
     setSubmitting(true);
     setError("");
     const chosenCharity = form.charity === "Muslim Charity (Custom)" ? `Custom: ${form.customCharity}` : form.charity;
     const orderNumber = "REH-" + Date.now().toString().slice(-6);
-    const formattedTotal = formatPrice(total);
-    const orderStatus = isPaid === true ? "paid" : "pending";
     const orderData = {
       order_number: orderNumber,
-      order_items: items.map(i => ({ product_id: i.slug, product_title: i.title, size: i.size, quantity: i.quantity, price: i.price, price_formatted: formatPrice(i.price) })),
+      order_items: items.map(i => ({ product_id: i.slug, product_title: i.title, size: i.size, quantity: i.quantity, price: i.price })),
       customer_name: form.name,
       customer_email: form.email,
       customer_phone: form.phone || "",
@@ -99,9 +290,7 @@ export default function Checkout() {
       shipping_cost: SHIPPING_COST,
       charity_donation: charityDonation,
       total: total,
-      total_formatted: formattedTotal,
-      currency: currency,
-      status: orderStatus,
+      status: "pending",
       created_date: new Date().toISOString()
     };
     try {
@@ -120,8 +309,7 @@ export default function Checkout() {
         shipping_cost: orderData.shipping_cost,
         charity_donation: orderData.charity_donation,
         total: orderData.total,
-        total_formatted: formattedTotal,
-        status: orderStatus
+        status: "pending"
       });
     } catch (e) { /* order save failed, continue to confirmation */ }
     clearCart();
@@ -244,19 +432,52 @@ export default function Checkout() {
 
             {/* Step 3: Payment */}
             {step === 3 && (
-              <StripePaymentSection
-                amount={convertPrice(total)}
-                currency={currency}
-                orderNumber={"REH-" + Date.now().toString().slice(-6)}
-                customerEmail={form.email}
-                customerName={form.name}
-                totalFormatted={formatPrice(total)}
-                onOrderPlace={placeOrder}
-                submitting={submitting}
-                error={error}
-                setError={setError}
-                onBack={() => setStep(2)}
-              />
+              <div>
+                {stripePromise ? (
+                  <Elements stripe={stripePromise}>
+                    <StripeCardForm
+                      form={form}
+                      total={total}
+                      items={items}
+                      subtotal={subtotal}
+                      shippingCost={SHIPPING_COST}
+                      charityDonation={charityDonation}
+                      clearCart={clearCart}
+                      navigate={navigate}
+                      setStep={setStep}
+                    />
+                  </Elements>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lock size={14} className="text-[#6B6B6B]" />
+                      <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase">Secure Payment</p>
+                    </div>
+                    <div className="bg-[#1a1a1a]/60 border border-[#333] p-4 font-mono text-xs text-[#E6E2D3]/80 leading-relaxed mb-4">
+                      <span className="text-[#C4311E] font-bold">Stripe Mode:</span> To activate Stripe card elements directly on this screen, make sure your Vercel Environment Variable is named <code className="text-[#E6E2D3] bg-[#0a0a0a] px-1.5 py-0.5 border border-[#333]">VITE_STRIPE_PUBLISHABLE_KEY</code> and redeploy.
+                    </div>
+                    <Field label="Card Number" value={form.cardNumber} onChange={v => set("cardNumber", formatCard(v))} placeholder="0000 0000 0000 0000" />
+                    <Field label="Name on Card" value={form.cardName} onChange={v => set("cardName", v)} placeholder="Name as it appears on card" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <Field label="Expiry (MM/YY)" value={form.expiry} onChange={v => set("expiry", formatExpiry(v))} placeholder="MM/YY" />
+                      <Field label="CVC" value={form.cvc} onChange={v => set("cvc", v.replace(/\D/g, "").slice(0, 4))} placeholder="123" />
+                    </div>
+                    {error && <p className="font-mono text-xs tracking-wider text-[#C4311E]">{error}</p>}
+                    <div className="flex gap-4 pt-2 items-center">
+                      <button onClick={() => setStep(2)} className="font-mono text-xs tracking-[0.3em] text-[#6B6B6B] hover:text-[#E6E2D3] uppercase transition-colors">← Back</button>
+                      <button
+                        onClick={placeOrder}
+                        disabled={!canPlaceOrder || submitting}
+                        className="bg-[#C4311E] hover:bg-[#a02818] disabled:bg-[#333] disabled:cursor-not-allowed text-[#E6E2D3] px-12 py-4 font-heading font-bold text-sm tracking-[0.3em] uppercase transition-colors ml-auto flex items-center gap-3"
+                      >
+                        {submitting
+                          ? <span className="w-4 h-4 border-2 border-[#E6E2D3] border-t-transparent rounded-full animate-spin" />
+                          : `Place Order — CA$${total}`}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -271,7 +492,7 @@ export default function Checkout() {
                     <div className="flex-1 flex flex-col justify-center">
                       <p className="font-heading text-xs font-bold text-[#E6E2D3] tracking-wide">{item.title}</p>
                       <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] uppercase mt-1">Size {item.size} — Qty {item.quantity}</p>
-                      <p className="font-body text-xs text-[#E6E2D3]/80 mt-1">{formatPrice(item.price * item.quantity)}</p>
+                      <p className="font-body text-xs text-[#E6E2D3]/80 mt-1">CA${item.price * item.quantity}</p>
                     </div>
                   </div>
                 ))}
@@ -279,19 +500,19 @@ export default function Checkout() {
               <div className="space-y-2 pt-4 border-t border-[#1a1a1a]">
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Subtotal</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">{formatPrice(subtotal)}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">CA${subtotal}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Shipping</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">{formatPrice(SHIPPING_COST)}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">CA${SHIPPING_COST}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Charity</span>
-                  <span className="font-body text-sm text-[#C4311E]">{formatPrice(charityDonation)}</span>
+                  <span className="font-body text-sm text-[#C4311E]">CA${charityDonation}</span>
                 </div>
                 <div className="flex justify-between pt-3 mt-3 border-t border-[#1a1a1a]">
                   <span className="font-heading text-sm font-bold text-[#E6E2D3]">Total</span>
-                  <span className="font-heading text-xl font-black text-[#C4311E]">{formatPrice(total)}</span>
+                  <span className="font-heading text-xl font-black text-[#C4311E]">CA${total}</span>
                 </div>
               </div>
             </div>

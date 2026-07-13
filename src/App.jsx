@@ -20,7 +20,6 @@ import OrderConfirmation from '@/pages/OrderConfirmation';
 import Privacy from '@/pages/Privacy';
 import Terms from '@/pages/Terms';
 import { CartProvider } from '@/lib/CartContext';
-import { CurrencyProvider } from '@/lib/CurrencyContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -86,11 +85,9 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
-          <CurrencyProvider>
-            <CartProvider>
-              <AuthenticatedApp />
-            </CartProvider>
-          </CurrencyProvider>
+          <CartProvider>
+            <AuthenticatedApp />
+          </CartProvider>
         </Router>
         <Toaster />
       </QueryClientProvider>
