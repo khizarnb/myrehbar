@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { amount, currency = "cad", orderNumber, customerEmail, customerName } = req.body || {};
+    const { amount, currency = "usd", orderNumber, customerEmail, customerName } = req.body || {};
 
     // Check and clean secret key from environment variables (remove leading/trailing spaces or newlines)
     const secretKey = (process.env.STRIPE_SECRET_KEY || process.env.VITE_STRIPE_SECRET_KEY || "").trim();
