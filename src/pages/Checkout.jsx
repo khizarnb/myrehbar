@@ -87,7 +87,7 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
             address: {
               line1: form.address,
               city: form.city,
-              country: form.country === "ROW" ? "GB" : (form.country || "US"),
+              country: getCleanCountryCode(form.country) === "ROW" ? "GB" : getCleanCountryCode(form.country),
               postal_code: form.zip
             }
           }
@@ -110,7 +110,7 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
           address: {
             line1: form.address,
             city: form.city,
-            country: form.country === "ROW" ? "GB" : (form.country || "US"),
+            country: getCleanCountryCode(form.country) === "ROW" ? "GB" : getCleanCountryCode(form.country),
             postal_code: form.zip
           }
         }
@@ -221,6 +221,16 @@ const getShippingCost = (country) => {
   if (country === "GB" || country === "ROW" || country === "United Kingdom" || country === "Rest of World") return 15;
   return 10;
 };
+const getCleanCountryCode = (country) => {
+  if (!country) return "US";
+  const upper = country.toString().toUpperCase().trim();
+  if (upper.includes("CANADA") || upper === "CA") return "CA";
+  if (upper.includes("UNITED STATES") || upper === "USA" || upper === "US") return "US";
+  if (upper.includes("UNITED KINGDOM") || upper.includes("GREAT BRITAIN") || upper === "UK" || upper === "GB") return "GB";
+  if (upper === "ROW" || upper.includes("WORLD") || upper.includes("REST OF")) return "ROW";
+  if (upper.length === 2) return upper;
+  return "US";
+};
 const CHARITY_PER_ITEM = 6;
 const STEP_LABELS = ["Shipping", "Charity", "Payment"];
 
@@ -264,7 +274,13 @@ export default function Checkout() {
     }
   }, [authed]);
 
-  const set = (field, val) => setForm(p => ({ ...p, [field]: val }));
+  const set = (field, val) => {
+    let sanitizedVal = val;
+    if (field === "country") {
+      sanitizedVal = getCleanCountryCode(val);
+    }
+    setForm(p => ({ ...p, [field]: sanitizedVal }));
+  };
   const shippingCost = getShippingCost(form.country);
   const total = subtotal + shippingCost;
   const charityDonation = CHARITY_PER_ITEM * cartCount;
