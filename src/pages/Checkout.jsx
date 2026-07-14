@@ -87,7 +87,7 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
             address: {
               line1: form.address,
               city: form.city,
-              country: form.country || "CA",
+              country: form.country === "ROW" ? "GB" : (form.country || "US"),
               postal_code: form.zip
             }
           }
@@ -110,7 +110,7 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
           address: {
             line1: form.address,
             city: form.city,
-            country: form.country || "CA",
+            country: form.country === "ROW" ? "GB" : (form.country || "US"),
             postal_code: form.zip
           }
         }
@@ -211,7 +211,16 @@ const CHARITIES = [
   { name: "Human Concern International", category: "Humanitarian Aid" },
   { name: "Charity of your choice", category: "Custom Donation" },
 ];
-const SHIPPING_COST = 10;
+const COUNTRY_OPTIONS = [
+  { code: "US", name: "United States ($10 USD Shipping)", cost: 10 },
+  { code: "CA", name: "Canada ($10 USD Shipping)", cost: 10 },
+  { code: "GB", name: "United Kingdom ($15 USD Shipping)", cost: 15 },
+  { code: "ROW", name: "Rest of World ($15 USD Shipping)", cost: 15 },
+];
+const getShippingCost = (country) => {
+  if (country === "GB" || country === "ROW" || country === "United Kingdom" || country === "Rest of World") return 15;
+  return 10;
+};
 const CHARITY_PER_ITEM = 6;
 const STEP_LABELS = ["Shipping", "Charity", "Payment"];
 
@@ -238,7 +247,7 @@ export default function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
-    name: "", email: "", phone: "", address: "", city: "", country: "", zip: "",
+    name: "", email: "", phone: "", address: "", city: "", country: "US", zip: "",
     charity: "", customCharity: "", cardNumber: "", cardName: "", expiry: "", cvc: ""
   });
 
@@ -256,7 +265,8 @@ export default function Checkout() {
   }, [authed]);
 
   const set = (field, val) => setForm(p => ({ ...p, [field]: val }));
-  const total = subtotal + SHIPPING_COST;
+  const shippingCost = getShippingCost(form.country);
+  const total = subtotal + shippingCost;
   const charityDonation = CHARITY_PER_ITEM * cartCount;
 
   const formatCard = (v) => v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
@@ -287,7 +297,7 @@ export default function Checkout() {
       shipping_zip: form.zip,
       charity: chosenCharity,
       subtotal: subtotal,
-      shipping_cost: SHIPPING_COST,
+      shipping_cost: shippingCost,
       charity_donation: charityDonation,
       total: total,
       status: "pending",
@@ -371,7 +381,18 @@ export default function Checkout() {
                 <Field label="Address" value={form.address} onChange={v => set("address", v)} placeholder="Street address" />
                 <div className="grid md:grid-cols-3 gap-4">
                   <Field label="City" value={form.city} onChange={v => set("city", v)} placeholder="City" />
-                  <Field label="Country" value={form.country} onChange={v => set("country", v)} placeholder="Country" />
+                  <div>
+                    <label className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] uppercase mb-2 block">Country / Shipping</label>
+                    <select
+                      value={form.country || "US"}
+                      onChange={e => set("country", e.target.value)}
+                      className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#E6E2D3] p-4 font-body text-sm focus:outline-none focus:border-[#C4311E] transition-colors"
+                    >
+                      {COUNTRY_OPTIONS.map(opt => (
+                        <option key={opt.code} value={opt.code}>{opt.name}</option>
+                      ))}
+                    </select>
+                  </div>
                   <Field label="Postal Code" value={form.zip} onChange={v => set("zip", v)} placeholder="ZIP / Postal" />
                 </div>
                 <button
@@ -440,7 +461,7 @@ export default function Checkout() {
                       total={total}
                       items={items}
                       subtotal={subtotal}
-                      shippingCost={SHIPPING_COST}
+                      shippingCost={shippingCost}
                       charityDonation={charityDonation}
                       clearCart={clearCart}
                       navigate={navigate}
@@ -504,7 +525,7 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Shipping</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">${SHIPPING_COST}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">${shippingCost}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Charity</span>

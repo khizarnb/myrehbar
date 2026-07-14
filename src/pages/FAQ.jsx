@@ -28,7 +28,7 @@ const FAQS = [
   },
   {
     q: "How much is shipping and how long does it take?",
-    a: "Shipping is $10 flat rate. Orders are processed within 1–2 business days and typically arrive within 5–10 business days depending on your location."
+    a: "Shipping is $10 USD flat rate for USA and Canada, and $15 USD for United Kingdom and Rest of World (ROW). Orders are processed within 1–2 business days and typically arrive within 5–10 business days depending on your location."
   },
   {
     q: "What is your return policy?",
