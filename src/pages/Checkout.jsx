@@ -62,7 +62,7 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: total,
-          currency: 'cad',
+          currency: 'usd',
           customer_email: form.email,
           order_number: orderNumber
         })
@@ -196,7 +196,7 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
           disabled={!stripe || submitting}
           className="bg-[#C4311E] hover:bg-[#a02818] disabled:bg-[#333] disabled:cursor-not-allowed text-[#E6E2D3] px-12 py-4 font-heading font-bold text-sm tracking-[0.3em] uppercase transition-colors ml-auto flex items-center gap-3"
         >
-          {submitting ? <span className="w-4 h-4 border-2 border-[#E6E2D3] border-t-transparent rounded-full animate-spin" /> : `Pay CA$${total} via Stripe`}
+          {submitting ? <span className="w-4 h-4 border-2 border-[#E6E2D3] border-t-transparent rounded-full animate-spin" /> : `Pay $${total} via Stripe`}
         </button>
       </div>
     </div>
@@ -388,7 +388,7 @@ export default function Checkout() {
             {step === 2 && (
               <div className="space-y-4">
                 <p className="font-body text-sm text-[#E6E2D3]/60 mb-6">
-                  <span className="text-[#C4311E] font-bold">CA${CHARITY_PER_ITEM}</span> from each shirt goes to a verified cause of your choice. Total donation: <span className="text-[#C4311E] font-bold">CA${charityDonation}</span>
+                  <span className="text-[#C4311E] font-bold">${CHARITY_PER_ITEM}</span> from each shirt goes to a verified cause of your choice. Total donation: <span className="text-[#C4311E] font-bold">${charityDonation}</span>
                 </p>
                 {CHARITIES.map(c => (
                   <button
@@ -472,7 +472,7 @@ export default function Checkout() {
                       >
                         {submitting
                           ? <span className="w-4 h-4 border-2 border-[#E6E2D3] border-t-transparent rounded-full animate-spin" />
-                          : `Place Order — CA$${total}`}
+                          : `Place Order — $${total}`}
                       </button>
                     </div>
                   </div>
@@ -492,7 +492,7 @@ export default function Checkout() {
                     <div className="flex-1 flex flex-col justify-center">
                       <p className="font-heading text-xs font-bold text-[#E6E2D3] tracking-wide">{item.title}</p>
                       <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] uppercase mt-1">Size {item.size} — Qty {item.quantity}</p>
-                      <p className="font-body text-xs text-[#E6E2D3]/80 mt-1">CA${item.price * item.quantity}</p>
+                      <p className="font-body text-xs text-[#E6E2D3]/80 mt-1">${item.price * item.quantity}</p>
                     </div>
                   </div>
                 ))}
@@ -500,19 +500,19 @@ export default function Checkout() {
               <div className="space-y-2 pt-4 border-t border-[#1a1a1a]">
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Subtotal</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">CA${subtotal}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">${subtotal}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Shipping</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">CA${SHIPPING_COST}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">${SHIPPING_COST}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Charity</span>
-                  <span className="font-body text-sm text-[#C4311E]">CA${charityDonation}</span>
+                  <span className="font-body text-sm text-[#C4311E]">${charityDonation}</span>
                 </div>
                 <div className="flex justify-between pt-3 mt-3 border-t border-[#1a1a1a]">
                   <span className="font-heading text-sm font-bold text-[#E6E2D3]">Total</span>
-                  <span className="font-heading text-xl font-black text-[#C4311E]">CA${total}</span>
+                  <span className="font-heading text-xl font-black text-[#C4311E]">${total}</span>
                 </div>
               </div>
             </div>

@@ -30,9 +30,9 @@ export default async function handler(req, res) {
       apiVersion: '2023-10-16',
     });
 
-    const { amount, currency = 'cad', customer_email, order_number } = req.body || {};
+    const { amount, currency = 'usd', customer_email, order_number } = req.body || {};
     
-    // Amount in cents (minimum $0.50 CAD = 50 cents)
+    // Amount in cents (minimum $0.50 USD = 50 cents)
     const amountInCents = Math.max(50, Math.round((Number(amount) || 0) * 100));
 
     const paymentIntent = await stripe.paymentIntents.create({

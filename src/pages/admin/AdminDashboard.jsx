@@ -16,7 +16,7 @@ export default function AdminDashboard() {
     { label: "Products", value: products?.length || 0, icon: Package, to: "/admin/products" },
     { label: "Total Inventory", value: totalInventory, icon: Box, to: "/admin/products" },
     { label: "Orders", value: orders?.length || 0, icon: ShoppingCart, to: "/admin/orders" },
-    { label: "Revenue", value: `CA$${totalRevenue.toFixed(0)}`, icon: TrendingUp, to: "/admin/orders" },
+    { label: "Revenue", value: `$${totalRevenue.toFixed(0)}`, icon: TrendingUp, to: "/admin/orders" },
   ];
 
   return (
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
               <span className="font-mono text-sm text-[#E6E2D3]">{o.order_number}</span>
               <span className="font-body text-sm text-[#6B6B6B] ml-4">{o.customer_name}</span>
             </div>
-            <span className="font-mono text-sm text-[#C4311E]">CA${o.total}</span>
+            <span className="font-mono text-sm text-[#C4311E]">${o.total}</span>
           </div>
         ))}
         {(!orders || orders.length === 0) && <p className="font-body text-[#6B6B6B]">No orders yet.</p>}

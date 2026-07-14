@@ -51,7 +51,7 @@ export default function Terms() {
           <section className="border-b border-[#1a1a1a] pb-10">
             <h2 className="font-heading text-2xl font-bold text-[#E6E2D3] tracking-wide mb-4">2. Pricing & Currency</h2>
             <p className="text-[#6B6B6B] mb-4">
-              All prices across our digital storefront are displayed in Canadian Dollars (<strong className="text-[#E6E2D3]">CA$</strong>) unless specifically converted by your financial institution. Rehbar reserves the right to adjust pricing for upcoming collections or modify promotional allocations without prior notice. Once an order is confirmed, the agreed-upon checkout price remains guaranteed.
+              All prices across our digital storefront are displayed in US Dollars (<strong className="text-[#E6E2D3]">$ / USD</strong>) unless specifically converted by your financial institution. Rehbar reserves the right to adjust pricing for upcoming collections or modify promotional allocations without prior notice. Once an order is confirmed, the agreed-upon checkout price remains guaranteed.
             </p>
           </section>
 
@@ -70,7 +70,7 @@ export default function Terms() {
           <section className="border-b border-[#1a1a1a] pb-10">
             <h2 className="font-heading text-2xl font-bold text-[#E6E2D3] tracking-wide mb-4">4. Charitable Contributions</h2>
             <p className="text-[#6B6B6B]">
-              Rehbar integrates community giving directly into every item acquired. When you select a verified cause or write a custom charity instruction at checkout, we allocate a portion from your purchase to that designated effort. All charitable transfers are documented for transparency. Rehbar makes no claim of tax-deductible receipts on behalf of individual retail purchasers unless explicitly specified under Canadian tax legislation.
+              Rehbar integrates community giving directly into every item acquired. When you select a verified cause or write a custom charity instruction at checkout, we allocate a portion from your purchase to that designated effort. All charitable transfers are documented for transparency. Rehbar makes no claim of tax-deductible receipts on behalf of individual retail purchasers unless explicitly specified under applicable tax legislation.
             </p>
           </section>
 

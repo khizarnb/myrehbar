@@ -12,7 +12,7 @@ const FAQS = [
   },
   {
     q: "How much goes to charity and who chooses the charity?",
-    a: "From every shirt sold, a direct donation (CA$6) goes to a charity of your choosing at checkout. We partner with verified organisations working in humanitarian aid, education, community infrastructure, and food poverty. You can also specify any custom Muslim charity at checkout."
+    a: "From every shirt sold, a direct donation ($6) goes to a charity of your choosing at checkout. We partner with verified organisations working in humanitarian aid, education, community infrastructure, and food poverty. You can also specify any custom Muslim charity at checkout."
   },
   {
     q: "Where are the shirts made?",
@@ -28,7 +28,7 @@ const FAQS = [
   },
   {
     q: "How much is shipping and how long does it take?",
-    a: "Shipping is CA$10 flat rate. Orders are processed within 1–2 business days and typically arrive within 5–10 business days depending on your location."
+    a: "Shipping is $10 flat rate. Orders are processed within 1–2 business days and typically arrive within 5–10 business days depending on your location."
   },
   {
     q: "What is your return policy?",
