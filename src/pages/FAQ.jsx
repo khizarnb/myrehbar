@@ -12,7 +12,7 @@ const FAQS = [
   },
   {
     q: "How much goes to charity and who chooses the charity?",
-    a: "From every shirt sold, a direct donation ($6) goes to a charity of your choosing at checkout. We partner with verified organisations working in humanitarian aid, education, community infrastructure, and food poverty. You can also specify any custom Muslim charity at checkout."
+    a: "From every shirt sold, a direct donation ($6) goes to a charity of your choosing at checkout. We partner with verified organisations working in humanitarian aid, education, community infrastructure, and food poverty. You can also specify any charity of your choice at checkout."
   },
   {
     q: "Where are the shirts made?",

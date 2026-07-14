@@ -124,7 +124,7 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
     }
 
     // Save order and complete
-    const chosenCharity = form.charity === "Muslim Charity (Custom)" ? `Custom: ${form.customCharity}` : form.charity;
+    const chosenCharity = form.charity === "Charity of your choice" ? `Custom: ${form.customCharity}` : form.charity;
     const orderData = {
       order_number: orderNumber,
       order_items: items.map(i => ({ product_id: i.slug, product_title: i.title, size: i.size, quantity: i.quantity, price: i.price })),
@@ -209,7 +209,7 @@ const CHARITIES = [
   { name: "Penny Appeal", category: "Food Poverty" },
   { name: "Zakat Foundation", category: "Community Infrastructure" },
   { name: "Human Concern International", category: "Humanitarian Aid" },
-  { name: "Muslim Charity (Custom)", category: "Custom Donation" },
+  { name: "Charity of your choice", category: "Custom Donation" },
 ];
 const SHIPPING_COST = 10;
 const CHARITY_PER_ITEM = 6;
@@ -266,14 +266,14 @@ export default function Checkout() {
   };
 
   const canProceedShipping = form.name && form.email && form.phone && form.address && form.city && form.country && form.zip;
-  const canProceedCharity = form.charity === "Muslim Charity (Custom)" ? !!form.customCharity?.trim() : !!form.charity;
+  const canProceedCharity = form.charity === "Charity of your choice" ? !!form.customCharity?.trim() : !!form.charity;
   const canPlaceOrder = form.cardNumber.replace(/\s/g, "").length === 16 && form.cardName && form.expiry.length === 5 && form.cvc.length >= 3;
 
   const placeOrder = async () => {
     if (!canPlaceOrder) { setError("Please complete all payment fields."); return; }
     setSubmitting(true);
     setError("");
-    const chosenCharity = form.charity === "Muslim Charity (Custom)" ? `Custom: ${form.customCharity}` : form.charity;
+    const chosenCharity = form.charity === "Charity of your choice" ? `Custom: ${form.customCharity}` : form.charity;
     const orderNumber = "REH-" + Date.now().toString().slice(-6);
     const orderData = {
       order_number: orderNumber,
@@ -405,7 +405,7 @@ export default function Checkout() {
                     </div>
                   </button>
                 ))}
-                {form.charity === "Muslim Charity (Custom)" && (
+                {form.charity === "Charity of your choice" && (
                   <div className="mt-4 pt-2">
                     <label className="font-mono text-[10px] tracking-[0.3em] text-[#C4311E] uppercase block mb-2">Specify Custom Charity Details</label>
                     <textarea
