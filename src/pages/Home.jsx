@@ -27,7 +27,7 @@ export default function Home() {
             The Artifact Collection
           </p>
           <h2 className="font-heading text-3xl md:text-5xl font-black tracking-[0.15em] text-[#E6E2D3]">
-            Q1 2026
+            The First Collection
           </h2>
           <div className="w-12 h-px bg-[#C4311E] mx-auto mt-6" />
         </motion.div>

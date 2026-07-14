@@ -22,7 +22,7 @@ export default function Collection() {
             The Artifact Collection
           </p>
           <h1 className="font-heading text-4xl md:text-6xl font-black tracking-[0.15em] text-[#E6E2D3]">
-            Q1 2026
+            The First Collection
           </h1>
           <div className="w-12 h-px bg-[#C4311E] mx-auto mt-6" />
           <p className="font-body text-lg text-[#E6E2D3]/60 max-w-xl mx-auto mt-8 leading-relaxed">
