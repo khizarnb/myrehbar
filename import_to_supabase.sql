@@ -88,7 +88,7 @@ VALUES (
   50,
   '100',
   'A masterwork of leadership and vision. This design captures the ''Rehbar'' (The Guide) — full-size calligraphic print across the chest. Crafted on premium heavyweight cotton, it represents the unwavering light of guidance in times of obscurity. Only 100 made. When they''re gone, they''re gone.',
-  '{"material":"100% Premium Heavyweight Cotton","weight":"280 GSM","print":"Full-Size Chest Print — Screen Printed","fit":"Relaxed Oversized","limited":"100 Units Only","charity":"$6 per shirt to a charity you choose"}'::jsonb,
+  '{"material":"100% Premium Heavyweight Cotton","weight":"280 GSM","print":"Full-Size Chest Print — Screen Printed","fit":"Regular","limited":"100 Units Only","charity":"$6 per shirt to a charity you choose"}'::jsonb,
   '["/images/rehbar-artical-1.png","/images/rehbar-artical-2.png","/images/rehbar-artical-3.png"]'::jsonb,
   '/images/rehbar-artical-1.png',
   100,
@@ -132,7 +132,7 @@ VALUES (
   50,
   '100',
   'Inspired by the historical significance of resilience and divine intervention. Sejjil is a study of force and destiny. The cracked-earth texture within the crimson circle conveys unstoppable momentum — the moment where the small overcomes the monolithic. Only 100 made.',
-  '{"material":"100% Premium Heavyweight Cotton","weight":"280 GSM","print":"Full Back Print — DTG Digital","fit":"Relaxed Oversized","limited":"100 Units Only","charity":"$6 per shirt to a charity you choose"}'::jsonb,
+  '{"material":"100% Premium Heavyweight Cotton","weight":"280 GSM","print":"Full Back Print — DTG Digital","fit":"Regular","limited":"100 Units Only","charity":"$6 per shirt to a charity you choose"}'::jsonb,
   '["/images/sejjil-artical.png","/images/sejjil-artical-1.png","/images/sejjil-artical-1.webp"]'::jsonb,
   '/images/sejjil-artical.png',
   100,
@@ -174,11 +174,11 @@ VALUES (
   '6a4fbf02508a18fce23927cb',
   'khyber-shikan',
   'KHYBER SHIKAN',
-  'THE BREAKER',
+  'THE TRAILBLAZER',
   50,
   '100',
   'A tribute to the indomitable spirit of the Khyber. This piece is an exercise in structural power and the breaking of barriers. The sweeping calligraphic blade on the back with the subtle Rehbar emblem at the chest — designed for spaces that demand a presence of strength. Only 100 made.',
-  '{"material":"100% Premium Heavyweight Cotton","weight":"280 GSM","print":"Full Back Print + Chest Emblem — Screen Printed","fit":"Relaxed Oversized","limited":"100 Units Only","charity":"$6 per shirt to a charity you choose"}'::jsonb,
+  '{"material":"100% Premium Heavyweight Cotton","weight":"280 GSM","print":"Full Back Print + Chest Emblem — Screen Printed","fit":"Regular","limited":"100 Units Only","charity":"$6 per shirt to a charity you choose"}'::jsonb,
   '["/images/khybershikan-artical.png","/images/khybershikan.png","/images/khybershikan-artical.png"]'::jsonb,
   '/images/khybershikan-artical.png',
   100,
@@ -197,7 +197,7 @@ In testing, this was consistently the design that drew the most physical reactio
 
 The front-and-back composition makes this the most complete design in the Q1 drop. Rehbar gives you the statement. Sejjil gives you the impact. Khyber Shikan gives you both — the quiet identity and the bold legacy.
 
-One hundred units. $6 from each to a cause of the wearer''s choosing. And then this design, like all Rehbar designs, enters the archive. The Pass remains. The Breaker moves on.',
+One hundred units. $6 from each to a cause of the wearer''s choosing. And then this design, like all Rehbar designs, enters the archive. The Pass remains. THE TRAILBLAZER moves on.',
   true
 )
 ON CONFLICT (id) DO UPDATE SET

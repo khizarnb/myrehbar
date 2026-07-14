@@ -20,11 +20,11 @@ const FAQS = [
   },
   {
     q: "What are the shirt specifications?",
-    a: "All shirts are 100% premium heavyweight cotton at 280 GSM with a relaxed oversized fit. Prints are either screen printed or DTG digital depending on the design. Each piece is crafted with purpose and care."
+    a: "All shirts are 100% premium heavyweight cotton at 280 GSM with a Regular fit. Prints are either screen printed or DTG digital depending on the design. Each piece is crafted with purpose and care."
   },
   {
     q: "How do I know what size to order?",
-    a: "Our shirts have a relaxed oversized fit. If you prefer a standard fit, order your usual size. For a more fitted look, consider sizing down. All sizes (S–XXL) are available unless a particular size has sold out within the limited release."
+    a: "Our shirts have a Regular fit. If you prefer a standard fit, order your usual size. For a more fitted look, consider sizing down. All sizes (S–XXL) are available unless a particular size has sold out within the limited release."
   },
   {
     q: "How much is shipping and how long does it take?",

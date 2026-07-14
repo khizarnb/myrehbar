@@ -12,7 +12,7 @@ export const products = [
       "material": "100% Premium Heavyweight Cotton",
       "weight": "280 GSM",
       "print": "Full-Size Chest Print — Screen Printed",
-      "fit": "Relaxed Oversized",
+      "fit": "Regular",
       "limited": "Limited Edition",
       "charity": "A portion from each item goes to your chosen cause"
     },
@@ -39,7 +39,7 @@ export const products = [
       "material": "100% Premium Heavyweight Cotton",
       "weight": "280 GSM",
       "print": "Full Back Print — DTG Digital",
-      "fit": "Relaxed Oversized",
+      "fit": "Regular",
       "limited": "Limited Edition",
       "charity": "A portion from each item goes to your chosen cause"
     },
@@ -58,7 +58,7 @@ export const products = [
     "id": "6a4fbf02508a18fce23927cb",
     "slug": "khyber-shikan",
     "title": "KHYBER SHIKAN",
-    "subtitle": "THE BREAKER",
+    "subtitle": "THE TRAILBLAZER",
     "price": 50,
     "edition": "Limited",
     "description": "A tribute to the indomitable spirit of the Khyber. This piece is an exercise in structural power and the breaking of barriers. The sweeping calligraphic blade on the back with the subtle Rehbar emblem at the chest — designed for spaces that demand a presence of strength. Exclusive Edition.",
@@ -66,7 +66,7 @@ export const products = [
       "material": "100% Premium Heavyweight Cotton",
       "weight": "280 GSM",
       "print": "Full Back Print + Chest Emblem — Screen Printed",
-      "fit": "Relaxed Oversized",
+      "fit": "Regular",
       "limited": "Limited Edition",
       "charity": "A portion from each item goes to your chosen cause"
     },
@@ -78,7 +78,7 @@ export const products = [
     "heroImage": "/images/khybershikan-artical.png",
     "inventory": 100,
     "blogTitle": "Beyond the Pass: The Legacy of Khyber Shikan",
-    "blogContent": "The Khyber Pass has long been the gateway of conquerors. A jagged wound carved through the Hindu Kush, it has witnessed the march of Alexander, the campaigns of the Mughals, and the defiance of those who refused to let anyone pass unchallenged. To be a Shikan — a Breaker — is to master the impossible terrain of life.\n\nخیبر شکن. Two words that carry centuries. The calligraphy on the back of this shirt does not sit still. The sweeping blade-form that contains the script moves diagonally across the fabric like a force cutting through resistance. The artist designed it to be read not as text, but as trajectory — a projectile in flight.\n\nAt the chest sits a small, precise Rehbar emblem. Subtle. Almost hidden. This is the quiet declaration: I belong to something. The back tells the world what that something is capable of.\n\nThe Khyber Shikan design occupies the space between restraint and eruption. From the front, you see a man in a black shirt with a small emblem. Turn around, and you see the full scope of the statement. This duality — calm approach, powerful departure — is the design philosophy distilled.\n\nThe calligraphy itself was rendered to reference the geography it is named after. The vertical stroke mirrors the steep cliff faces of the Pass. The horizontal sweep mimics the road that winds through it. And the flourish at the tail — that rising, defiant curve — represents the moment you emerge on the other side, changed.\n\nIn testing, this was consistently the design that drew the most physical reactions. People reached out to touch the back print. They traced the calligraphy with their fingers. It is a design that demands tactile engagement, which is why the screen-print technique was chosen — the ink sits raised on the fabric, creating a texture you can feel.\n\nThe front-and-back composition makes this the most complete design in the collection. Rehbar gives you the statement. Sejjil gives you the impact. Khyber Shikan gives you both — the quiet identity and the bold legacy.\n\nCrafted with dedication. A contribution from each to a cause of the wearer's choosing. And then this design, like all Rehbar designs, enters the archive. The Pass remains. The Breaker moves on.",
+    "blogContent": "The Khyber Pass has long been the gateway of conquerors. A jagged wound carved through the Hindu Kush, it has witnessed the march of Alexander, the campaigns of the Mughals, and the defiance of those who refused to let anyone pass unchallenged. To be a Shikan — a Breaker — is to master the impossible terrain of life.\n\nخیبر شکن. Two words that carry centuries. The calligraphy on the back of this shirt does not sit still. The sweeping blade-form that contains the script moves diagonally across the fabric like a force cutting through resistance. The artist designed it to be read not as text, but as trajectory — a projectile in flight.\n\nAt the chest sits a small, precise Rehbar emblem. Subtle. Almost hidden. This is the quiet declaration: I belong to something. The back tells the world what that something is capable of.\n\nThe Khyber Shikan design occupies the space between restraint and eruption. From the front, you see a man in a black shirt with a small emblem. Turn around, and you see the full scope of the statement. This duality — calm approach, powerful departure — is the design philosophy distilled.\n\nThe calligraphy itself was rendered to reference the geography it is named after. The vertical stroke mirrors the steep cliff faces of the Pass. The horizontal sweep mimics the road that winds through it. And the flourish at the tail — that rising, defiant curve — represents the moment you emerge on the other side, changed.\n\nIn testing, this was consistently the design that drew the most physical reactions. People reached out to touch the back print. They traced the calligraphy with their fingers. It is a design that demands tactile engagement, which is why the screen-print technique was chosen — the ink sits raised on the fabric, creating a texture you can feel.\n\nThe front-and-back composition makes this the most complete design in the collection. Rehbar gives you the statement. Sejjil gives you the impact. Khyber Shikan gives you both — the quiet identity and the bold legacy.\n\nCrafted with dedication. A contribution from each to a cause of the wearer's choosing. And then this design, like all Rehbar designs, enters the archive. The Pass remains. THE TRAILBLAZER moves on.",
     "active": true
   }
 ];
