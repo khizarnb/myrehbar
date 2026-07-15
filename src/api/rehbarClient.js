@@ -685,13 +685,51 @@ export const db = {
             console.warn('Supabase upload failed, falling back to local URL:', e);
           }
         }
-        // Fallback for offline/unconfigured testing so UI works instantly
         return new Promise((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve({ file_url: reader.result });
           reader.onerror = () => resolve({ file_url: typeof URL !== 'undefined' ? URL.createObjectURL(file) : '' });
           reader.readAsDataURL(file);
         });
+      },
+      SendEmail: async ({ to = 'sales@myrehbar.com', subject, body, orderData }) => {
+        const targetEmail = to || 'sales@myrehbar.com';
+        console.log(`[Rehbar Email System] Dispatching notification to ${targetEmail}: "${subject}"`);
+
+        // 1. Try Supabase Edge Function if available
+        if (supabase) {
+          try {
+            await supabase.functions.invoke('send-email', {
+              body: { to: targetEmail, subject, body, orderData }
+            });
+          } catch (e) {
+            console.warn('Supabase edge email function skipped:', e);
+          }
+        }
+
+        // 2. Dispatch via FormSubmit AJAX API so sales@myrehbar.com receives instant notification
+        try {
+          const payload = {
+            _subject: subject || `🚨 New Notification from REHBAR Store`,
+            _template: 'table',
+            _captcha: 'false',
+            Message: body || subject,
+            ...(orderData || {})
+          };
+          
+          await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(targetEmail)}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+          return { success: true, message: `Email successfully sent to ${targetEmail}` };
+        } catch (err) {
+          console.error('Email dispatch error:', err);
+          return { success: false, error: err };
+        }
       }
     }
   }

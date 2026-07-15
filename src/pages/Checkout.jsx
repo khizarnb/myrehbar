@@ -162,7 +162,34 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
         total: orderData.total,
         status: "paid (stripe: " + paymentMethodIdOrStatus + ")"
       });
-    } catch (e) {}
+
+      // Dispatch order notification email to sales@myrehbar.com
+      const itemsFormatted = orderData.order_items.map(i => `${i.quantity}x ${i.product_title} (${i.size || 'Regular'}) - $${i.price * i.quantity}`).join(' | ');
+      const emailSubject = `🚨 NEW REHBAR ORDER #${orderData.order_number} ($${orderData.total} USD - ${orderData.shipping_country})`;
+      const emailBody = `A new order has been placed on REHBAR Store!\n\nOrder #${orderData.order_number}\nTotal Amount: $${orderData.total} USD\nCustomer: ${orderData.customer_name} (${orderData.customer_email})\nPhone: ${orderData.customer_phone || 'N/A'}\n\nShipping Destination:\n${orderData.shipping_address}, ${orderData.shipping_city}, ${orderData.shipping_zip}, ${orderData.shipping_country}\n\nItems:\n${itemsFormatted}\n\nCharity Selected: ${orderData.charity} (Donation: $${orderData.charity_donation})\nPayment Status: Paid (${paymentMethodIdOrStatus})`;
+
+      if (db.integrations?.Core?.SendEmail) {
+        await db.integrations.Core.SendEmail({
+          to: 'sales@myrehbar.com',
+          subject: emailSubject,
+          body: emailBody,
+          orderData: {
+            "Order Number": `#${orderData.order_number}`,
+            "Total Paid": `$${orderData.total} USD`,
+            "Customer Name": orderData.customer_name,
+            "Customer Email": orderData.customer_email,
+            "Customer Phone": orderData.customer_phone || 'N/A',
+            "Shipping Address": `${orderData.shipping_address}, ${orderData.shipping_city}, ${orderData.shipping_zip}, ${orderData.shipping_country}`,
+            "Items Ordered": itemsFormatted,
+            "Charity Selection": `${orderData.charity} ($${orderData.charity_donation} donation)`,
+            "Payment Status": `Paid (${paymentMethodIdOrStatus})`,
+            "Order Time": new Date().toLocaleString()
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Order creation or email notification error:', e);
+    }
     clearCart();
     navigate(`/order-confirmation/${orderNumber}`, { state: { order: orderData } });
   };
