@@ -147,48 +147,51 @@ export const db = {
   entities: {
     Product: {
       list: async () => {
+        let list = [];
         if (supabase) {
           const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-          if (!error && data && data.length > 0) return data;
+          if (!error && data && data.length > 0) {
+            list = data;
+          }
+        }
+        if (!list.length) {
+          list = fallbackProducts;
         }
         if (typeof window !== 'undefined') {
           const local = localStorage.getItem('__rehbar_local_products__');
           if (local) {
-            try { return JSON.parse(local); } catch {}
+            try {
+              const parsedLocal = JSON.parse(local);
+              if (Array.isArray(parsedLocal) && parsedLocal.length > 0) {
+                const mergedMap = new Map();
+                list.forEach(item => {
+                  mergedMap.set(String(item.id || item.slug), item);
+                });
+                parsedLocal.forEach(localItem => {
+                  const key = String(localItem.id || localItem.slug);
+                  if (mergedMap.has(key)) {
+                    mergedMap.set(key, { ...mergedMap.get(key), ...localItem });
+                  } else {
+                    mergedMap.set(key, localItem);
+                  }
+                });
+                return Array.from(mergedMap.values());
+              }
+            } catch {}
           }
         }
-        return fallbackProducts;
+        return list;
       },
       filter: async (query) => {
-        if (supabase && query?.slug) {
-          const { data, error } = await supabase.from('products').select('*').eq('slug', query.slug);
-          if (!error && data && data.length > 0) return data;
-        }
-        let list = fallbackProducts;
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_products__');
-          if (local) {
-            try { list = JSON.parse(local); } catch {}
-          }
-        }
+        let list = await db.entities.Product.list();
         if (query?.slug) {
-          return list.filter(p => p.slug === query.slug);
+          return list.filter(p => p.slug === query.slug || p.id === query.slug);
         }
         return list;
       },
       get: async (id) => {
-        if (supabase) {
-          const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
-          if (!error && data) return data;
-        }
-        let list = fallbackProducts;
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_products__');
-          if (local) {
-            try { list = JSON.parse(local); } catch {}
-          }
-        }
-        return list.find(p => p.id === id || p.slug === id) || null;
+        let list = await db.entities.Product.list();
+        return list.find(p => String(p.id) === String(id) || String(p.slug) === String(id)) || null;
       },
       create: async (data) => {
         const payload = { ...data };
@@ -202,14 +205,18 @@ export const db = {
         }
         if (supabase) {
           const { data: created, error } = await supabase.from('products').insert([payload]).select().single();
-          if (!error && created) return created;
+          if (!error && created) {
+            if (typeof window !== 'undefined') {
+              let list = await db.entities.Product.list();
+              list = [created, ...list.filter(p => p.id !== created.id)];
+              localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
+            }
+            return created;
+          } else if (error) {
+            console.warn('[Supabase Product Create Error]', error);
+          }
         }
-        // Fallback or localStorage
-        let list = [...fallbackProducts];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_products__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
+        let list = await db.entities.Product.list();
         const newItem = { id: 'prod_' + Date.now(), ...payload };
         list.unshift(newItem);
         if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
@@ -225,30 +232,36 @@ export const db = {
           try { payload.images = JSON.parse(payload.images_json); } catch {}
           delete payload.images_json;
         }
+        let updated = null;
         if (supabase) {
-          const { data: updated, error } = await supabase.from('products').update(payload).eq('id', id).select().single();
-          if (!error && updated) return updated;
+          // First try updating by id
+          let res = await supabase.from('products').update(payload).eq('id', id).select().single();
+          if (!res.error && res.data) {
+            updated = res.data;
+          } else {
+            // Try updating by slug if id was slug or uuid mismatch
+            const slugToTry = payload.slug || id;
+            res = await supabase.from('products').update(payload).eq('slug', slugToTry).select().single();
+            if (!res.error && res.data) {
+              updated = res.data;
+            } else if (res.error) {
+              console.warn(`[Supabase Update Notice] Supabase DB update for product ${id} skipped/blocked by RLS (${res.error.message}), saving to live store:`, res.error);
+            }
+          }
         }
-        // Fallback or localStorage
-        let list = [...fallbackProducts];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_products__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        list = list.map(p => p.id === id ? { ...p, ...payload } : p);
+        // Update local storage and return merged result so live site updates instantly
+        let list = await db.entities.Product.list();
+        list = list.map(p => (String(p.id) === String(id) || String(p.slug) === String(id) || (updated && (p.id === updated.id || p.slug === updated.slug))) ? { ...p, ...payload, ...(updated || {}) } : p);
         if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
-        return list.find(p => p.id === id) || { id, ...payload };
+        return list.find(p => String(p.id) === String(id) || String(p.slug) === String(id)) || { id, ...payload };
       },
       delete: async (id) => {
         if (supabase) {
           await supabase.from('products').delete().eq('id', id);
+          await supabase.from('products').delete().eq('slug', id);
         }
-        let list = [...fallbackProducts];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_products__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        list = list.filter(p => p.id !== id);
+        let list = await db.entities.Product.list();
+        list = list.filter(p => String(p.id) !== String(id) && String(p.slug) !== String(id));
         if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
         return { success: true };
       }
