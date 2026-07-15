@@ -25,8 +25,10 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminProducts from '@/pages/admin/AdminProducts';
 import AdminOrders from '@/pages/admin/AdminOrders';
+import AdminCustomers from '@/pages/admin/AdminCustomers';
 import AdminJournal from '@/pages/admin/AdminJournal';
 import AdminMessages from '@/pages/admin/AdminMessages';
+import AdminSettings from '@/pages/admin/AdminSettings';
 import Login from '@/pages/Login';
 
 const AuthenticatedApp = () => {
@@ -70,8 +72,10 @@ const AuthenticatedApp = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/customers" element={<AdminCustomers />} />
           <Route path="/admin/journal" element={<AdminJournal />} />
           <Route path="/admin/messages" element={<AdminMessages />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

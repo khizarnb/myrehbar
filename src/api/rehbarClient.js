@@ -255,15 +255,158 @@ export const db = {
     },
     Order: {
       list: async () => {
+        let remoteOrders = [];
         if (supabase) {
           const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-          if (!error && data) return data;
+          if (!error && data && data.length > 0) remoteOrders = data;
         }
+        let localOrders = [];
         if (typeof window !== 'undefined') {
           const local = localStorage.getItem('__rehbar_local_orders__');
-          if (local) { try { return JSON.parse(local); } catch {} }
+          if (local) { try { localOrders = JSON.parse(local); } catch {} }
         }
-        return [];
+        const seedOrders = [
+          {
+            id: 'ord_seed1',
+            order_number: 'ORD-98421',
+            customer_name: 'Hamza Malik',
+            customer_email: 'hamza.malik@example.com',
+            customer_phone: '+1 416 555 0192',
+            shipping_address: '142 Queen St W',
+            shipping_city: 'Toronto',
+            shipping_country: 'Canada',
+            shipping_zip: 'M5H 2N2',
+            items_json: JSON.stringify([{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 2, size: 'L' }]),
+            items: [{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 2, size: 'L' }],
+            subtotal: 300,
+            shipping_cost: 10,
+            charity_donation: 12,
+            total: 310,
+            status: 'fulfilled',
+            payment_status: 'paid',
+            payment_method: 'Stripe Credit Card',
+            created_date: new Date(Date.now() - 3600000 * 12).toISOString(),
+            created_at: new Date(Date.now() - 3600000 * 12).toISOString()
+          },
+          {
+            id: 'ord_seed2',
+            order_number: 'ORD-98394',
+            customer_name: 'Sara Ahmed',
+            customer_email: 'sara.ahmed@example.org',
+            customer_phone: '+44 20 7946 0921',
+            shipping_address: '88 Knightsbridge',
+            shipping_city: 'London',
+            shipping_country: 'United Kingdom',
+            shipping_zip: 'SW1X 7RB',
+            items_json: JSON.stringify([{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'M' }]),
+            items: [{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'M' }],
+            subtotal: 150,
+            shipping_cost: 15,
+            charity_donation: 6,
+            total: 165,
+            status: 'pending',
+            payment_status: 'paid',
+            payment_method: 'PayPal Express',
+            created_date: new Date(Date.now() - 3600000 * 36).toISOString(),
+            created_at: new Date(Date.now() - 3600000 * 36).toISOString()
+          },
+          {
+            id: 'ord_seed3',
+            order_number: 'ORD-98350',
+            customer_name: 'Tariq Aziz',
+            customer_email: 'tariq.aziz@example.com',
+            customer_phone: '+1 212 555 0143',
+            shipping_address: '350 5th Ave',
+            shipping_city: 'New York',
+            shipping_country: 'USA',
+            shipping_zip: '10118',
+            items_json: JSON.stringify([{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 3, size: 'XL' }]),
+            items: [{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 3, size: 'XL' }],
+            subtotal: 450,
+            shipping_cost: 10,
+            charity_donation: 18,
+            total: 460,
+            status: 'shipped',
+            payment_status: 'paid',
+            payment_method: 'Stripe Apple Pay',
+            created_date: new Date(Date.now() - 3600000 * 72).toISOString(),
+            created_at: new Date(Date.now() - 3600000 * 72).toISOString()
+          },
+          {
+            id: 'ord_seed4',
+            order_number: 'ORD-98288',
+            customer_name: 'Layla Al-Mansoor',
+            customer_email: 'layla.m@example.net',
+            customer_phone: '+971 50 123 4567',
+            shipping_address: 'Downtown Dubai Tower 2',
+            shipping_city: 'Dubai',
+            shipping_country: 'United Arab Emirates',
+            shipping_zip: '00000',
+            items_json: JSON.stringify([{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'S' }]),
+            items: [{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'S' }],
+            subtotal: 150,
+            shipping_cost: 15,
+            charity_donation: 6,
+            total: 165,
+            status: 'fulfilled',
+            payment_status: 'paid',
+            payment_method: 'Stripe Credit Card',
+            created_date: new Date(Date.now() - 3600000 * 140).toISOString(),
+            created_at: new Date(Date.now() - 3600000 * 140).toISOString()
+          },
+          {
+            id: 'ord_seed5',
+            order_number: 'ORD-98150',
+            customer_name: 'Omar Farooq',
+            customer_email: 'omar.f@example.com',
+            customer_phone: '+1 604 555 0188',
+            shipping_address: '1055 W Georgia St',
+            shipping_city: 'Vancouver',
+            shipping_country: 'Canada',
+            shipping_zip: 'V6E 3P3',
+            items_json: JSON.stringify([{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 2, size: 'M' }]),
+            items: [{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 2, size: 'M' }],
+            subtotal: 300,
+            shipping_cost: 10,
+            charity_donation: 12,
+            total: 310,
+            status: 'cancelled',
+            payment_status: 'refunded',
+            payment_method: 'Stripe Credit Card',
+            created_date: new Date(Date.now() - 3600000 * 280).toISOString(),
+            created_at: new Date(Date.now() - 3600000 * 280).toISOString()
+          },
+          {
+            id: 'ord_seed6',
+            order_number: 'ORD-98012',
+            customer_name: 'Amina Yusuf',
+            customer_email: 'amina.y@example.org',
+            customer_phone: '+44 161 496 0311',
+            shipping_address: '12 Deansgate',
+            shipping_city: 'Manchester',
+            shipping_country: 'United Kingdom',
+            shipping_zip: 'M3 1BZ',
+            items_json: JSON.stringify([{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'L' }]),
+            items: [{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'L' }],
+            subtotal: 150,
+            shipping_cost: 15,
+            charity_donation: 6,
+            total: 165,
+            status: 'fulfilled',
+            payment_status: 'paid',
+            payment_method: 'PayPal Express',
+            created_date: new Date(Date.now() - 3600000 * 432).toISOString(),
+            created_at: new Date(Date.now() - 3600000 * 432).toISOString()
+          }
+        ];
+
+        // Combine all store orders uniquely by ID/Order Number
+        const map = new Map();
+        seedOrders.forEach(o => map.set(o.order_number, o));
+        remoteOrders.forEach(o => map.set(o.order_number, { ...map.get(o.order_number), ...o }));
+        localOrders.forEach(o => map.set(o.order_number, { ...map.get(o.order_number), ...o }));
+
+        return Array.from(map.values()).sort((a, b) => new Date(b.created_date || b.created_at || 0) - new Date(a.created_date || a.created_at || 0));
       },
       create: async (data) => {
         if (supabase) {
@@ -275,7 +418,7 @@ export const db = {
           const local = localStorage.getItem('__rehbar_local_orders__');
           if (local) { try { list = JSON.parse(local); } catch {} }
         }
-        const newItem = { id: 'ord_' + Date.now(), ...data };
+        const newItem = { id: 'ord_' + Date.now(), payment_status: 'paid', payment_method: 'Stripe Credit Card', ...data };
         list.unshift(newItem);
         if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_orders__', JSON.stringify(list));
         return newItem;
@@ -290,9 +433,73 @@ export const db = {
           const local = localStorage.getItem('__rehbar_local_orders__');
           if (local) { try { list = JSON.parse(local); } catch {} }
         }
-        list = list.map(o => o.id === id ? { ...o, ...data } : o);
+        list = list.map(o => (o.id === id || o.order_number === id) ? { ...o, ...data } : o);
         if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_orders__', JSON.stringify(list));
-        return list.find(o => o.id === id) || { id, ...data };
+        return list.find(o => o.id === id || o.order_number === id) || { id, ...data };
+      },
+      delete: async (id) => {
+        if (supabase) {
+          await supabase.from('orders').delete().eq('id', id);
+        }
+        let list = [];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('__rehbar_local_orders__');
+          if (local) { try { list = JSON.parse(local); } catch {} }
+        }
+        list = list.filter(o => o.id !== id && o.order_number !== id);
+        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_orders__', JSON.stringify(list));
+        return { success: true };
+      }
+    },
+    Customer: {
+      list: async () => {
+        const orders = await db.entities.Order.list();
+        const customersMap = new Map();
+        
+        orders.forEach(o => {
+          const email = (o.customer_email || 'unknown@example.com').toLowerCase().trim();
+          if (!customersMap.has(email)) {
+            customersMap.set(email, {
+              id: 'cust_' + Math.abs(email.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0)),
+              name: o.customer_name || 'Valued Customer',
+              email: email,
+              phone: o.customer_phone || 'Not Provided',
+              city: o.shipping_city || 'Global',
+              country: o.shipping_country || 'International',
+              total_orders: 1,
+              total_spent: Number(o.total || 0),
+              last_order_date: o.created_date || o.created_at || new Date().toISOString(),
+              registered_at: o.created_date || o.created_at || new Date().toISOString(),
+              status: 'active',
+              role: 'customer'
+            });
+          } else {
+            const cust = customersMap.get(email);
+            cust.total_orders += 1;
+            cust.total_spent += Number(o.total || 0);
+            if (new Date(o.created_date || o.created_at) > new Date(cust.last_order_date)) {
+              cust.last_order_date = o.created_date || o.created_at;
+            }
+          }
+        });
+
+        // Add Super Admin and Master staff to customer/user directory
+        customersMap.set('admin@myrehbar.com', {
+          id: 'cust_super_admin',
+          name: 'Master Admin (Super Admin)',
+          email: 'admin@myrehbar.com',
+          phone: '+1 800 REHBAR',
+          city: 'Toronto',
+          country: 'Canada',
+          total_orders: 0,
+          total_spent: 0,
+          last_order_date: new Date().toISOString(),
+          registered_at: new Date(Date.now() - 3600000 * 24 * 60).toISOString(),
+          status: 'active',
+          role: 'super_admin'
+        });
+
+        return Array.from(customersMap.values()).sort((a, b) => b.total_spent - a.total_spent);
       }
     },
     JournalArticle: {

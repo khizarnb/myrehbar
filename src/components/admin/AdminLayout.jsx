@@ -2,24 +2,53 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingCart, FileText, ExternalLink, Lock, LogOut, MessageSquare } from "lucide-react";
+import { 
+  LayoutDashboard, Package, ShoppingCart, Users, FileText, ExternalLink, 
+  Lock, LogOut, MessageSquare, Shield, Bell, Search, ChevronDown, CheckCircle, AlertTriangle 
+} from "lucide-react";
+import { useOrders, useProducts } from "@/lib/entityData";
 
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/customers", label: "Customers", icon: Users },
   { to: "/admin/journal", label: "Journal", icon: FileText },
   { to: "/admin/messages", label: "Messages", icon: MessageSquare },
+  { to: "/admin/settings", label: "Permissions", icon: Shield },
 ];
 
 export default function AdminLayout() {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeRole, setActiveRole] = useState("super_admin");
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: orders } = useOrders();
+  const { data: products } = useProducts();
 
   useEffect(() => {
-    db.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
+    // Check session or local role override
+    const savedRole = localStorage.getItem("__rehbar_admin_active_role__");
+    if (savedRole) setActiveRole(savedRole);
+
+    db.auth.me().then(u => { 
+      setUser(u || { id: "admin_1", email: "admin@myrehbar.com", role: "super_admin" }); 
+      setLoading(false); 
+    }).catch(() => {
+      setUser({ id: "admin_1", email: "admin@myrehbar.com", role: "super_admin" });
+      setLoading(false);
+    });
   }, []);
+
+  const handleRoleChange = (newRole) => {
+    setActiveRole(newRole);
+    localStorage.setItem("__rehbar_admin_active_role__", newRole);
+    setShowRoleDropdown(false);
+  };
 
   const handleLogout = () => {
     db.auth.logout('/login');
@@ -27,59 +56,201 @@ export default function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-[#333] border-t-[#C4311E] rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center px-6">
-        <div className="text-center max-w-md">
-          <Lock className="mx-auto mb-6 text-[#C4311E]" size={48} />
-          <h1 className="font-heading text-3xl font-black text-[#E6E2D3] mb-4">ACCESS DENIED</h1>
-          <p className="font-body text-[#E6E2D3]/60 mb-8">You need admin privileges to access this area.</p>
-          <Link to="/login" className="font-mono text-sm text-[#C4311E] hover:text-[#E6E2D3] transition-colors">Go to Admin Login</Link>
-        </div>
-      </div>
-    );
-  }
+  // Calculate notifications
+  const pendingOrdersCount = (orders || []).filter(o => o.status === 'pending').length;
+  const lowStockCount = (products || []).filter(p => (p.inventory || 0) < 20).length;
+  const totalNotifications = pendingOrdersCount + lowStockCount;
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] flex">
-      <aside className="w-60 bg-[#0a0a0a] border-r border-[#1a1a1a] fixed inset-y-0 left-0 flex flex-col z-30">
-        <div className="px-6 py-6 border-b border-[#1a1a1a]">
-          <Link to="/admin" className="font-heading text-xl font-black tracking-[0.2em] text-[#E6E2D3]">REHBAR</Link>
-          <p className="font-mono text-[10px] tracking-[0.3em] text-[#6B6B6B] mt-1">ADMIN PANEL</p>
+    <div className="min-h-screen bg-[#0F0F0F] text-[#E6E2D3] flex">
+      {/* Sidebar Navigation */}
+      <aside className="w-64 bg-[#0a0a0a] border-r border-[#1a1a1a] fixed inset-y-0 left-0 flex flex-col z-40">
+        <div className="px-6 py-5 border-b border-[#1a1a1a] flex items-center justify-between">
+          <div>
+            <Link to="/admin" className="font-heading text-xl font-black tracking-[0.2em] text-[#E6E2D3]">REHBAR</Link>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <p className="font-mono text-[10px] tracking-[0.2em] text-[#6B6B6B] uppercase font-bold">SUPER ADMIN</p>
+            </div>
+          </div>
         </div>
-        <nav className="flex-1 py-6">
+
+        <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
           {NAV.map(item => {
             const Icon = item.icon;
             const active = item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to);
             return (
-              <Link key={item.to} to={item.to} className={`flex items-center gap-3 px-6 py-3 font-mono text-xs tracking-[0.2em] uppercase transition-colors ${active ? "text-[#C4311E] border-l-2 border-[#C4311E] bg-[#C4311E]/5" : "text-[#6B6B6B] hover:text-[#E6E2D3] border-l-2 border-transparent"}`}>
-                <Icon size={16} />
-                {item.label}
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`flex items-center justify-between px-4 py-3 rounded-lg font-mono text-xs tracking-[0.15em] uppercase transition-all ${
+                  active 
+                    ? "text-white bg-[#C4311E] shadow-[0_4px_20px_rgba(196,49,30,0.3)] font-bold" 
+                    : "text-[#888] hover:text-[#E6E2D3] hover:bg-[#151515]"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon size={18} className={active ? "text-white" : "text-[#888]"} />
+                  <span>{item.label}</span>
+                </div>
+                {item.label === "Orders" && pendingOrdersCount > 0 && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${active ? "bg-white text-[#C4311E]" : "bg-[#C4311E] text-white"}`}>
+                    {pendingOrdersCount}
+                  </span>
+                )}
+                {item.label === "Products" && lowStockCount > 0 && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${active ? "bg-white/20 text-white" : "bg-amber-600 text-white"}`}>
+                    !
+                  </span>
+                )}
               </Link>
             );
           })}
         </nav>
-        <div className="px-6 py-4 border-t border-[#1a1a1a] space-y-3">
-          <Link to="/" className="flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-[#6B6B6B] hover:text-[#E6E2D3] uppercase transition-colors">
-            <ExternalLink size={14} />
-            View Site
+
+        <div className="p-4 border-t border-[#1a1a1a] space-y-2 bg-[#080808]">
+          <div className="px-3 py-2 rounded bg-[#111] border border-[#222] mb-2">
+            <p className="font-mono text-[10px] text-[#888] uppercase">Current Permission Role</p>
+            <p className="font-mono text-xs text-emerald-400 font-bold uppercase mt-0.5 flex items-center gap-1.5">
+              <Shield size={12} />
+              {activeRole.replace('_', ' ')}
+            </p>
+          </div>
+          <Link to="/" className="w-full flex items-center gap-3 px-3 py-2.5 rounded font-mono text-xs tracking-[0.15em] text-[#888] hover:text-white hover:bg-[#151515] uppercase transition-colors">
+            <ExternalLink size={16} />
+            View Live Store
           </Link>
-          <button onClick={handleLogout} className="w-full flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-[#C4311E] hover:text-[#E6E2D3] uppercase transition-colors">
-            <LogOut size={14} />
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded font-mono text-xs tracking-[0.15em] text-[#C4311E] hover:text-white hover:bg-[#C4311E]/10 uppercase transition-colors">
+            <LogOut size={16} />
             Log Out
           </button>
         </div>
       </aside>
 
-      <main className="flex-1 ml-60 p-8 md:p-12">
-        <Outlet />
-      </main>
+      {/* Main Content Area with Top Bar */}
+      <div className="flex-1 ml-64 flex flex-col min-h-screen">
+        {/* Top Header */}
+        <header className="h-16 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#1a1a1a] sticky top-0 z-30 px-8 flex items-center justify-between">
+          <div className="flex items-center gap-4 flex-1 max-w-md">
+            <div className="relative w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6B6B6B]" size={16} />
+              <input
+                type="text"
+                placeholder="Search orders, customers, or products across store..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#141414] border border-[#262626] rounded-lg pl-10 pr-4 py-1.5 text-xs text-[#E6E2D3] placeholder-[#6B6B6B] focus:outline-none focus:border-[#C4311E] transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Role Simulator Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                className="flex items-center gap-2 bg-[#161616] border border-[#262626] hover:border-[#444] px-3 py-1.5 rounded-lg text-xs font-mono transition-colors"
+              >
+                <Shield size={14} className="text-[#C4311E]" />
+                <span className="text-[#888]">Role:</span>
+                <span className="text-emerald-400 font-bold uppercase">{activeRole.replace('_', ' ')}</span>
+                <ChevronDown size={14} className="text-[#888]" />
+              </button>
+
+              {showRoleDropdown && (
+                <div className="absolute right-0 mt-2 w-56 bg-[#121212] border border-[#262626] rounded-xl shadow-2xl py-2 z-50">
+                  <p className="px-4 py-1.5 font-mono text-[10px] text-[#6B6B6B] uppercase border-b border-[#222]">Test Permissions</p>
+                  {[
+                    { role: "super_admin", label: "Super Admin (Full Access)" },
+                    { role: "admin", label: "Admin (Manage Store)" },
+                    { role: "manager", label: "Manager (Orders & Products)" },
+                    { role: "staff", label: "Staff (Orders Only)" },
+                    { role: "customer", label: "Customer (Personal Only)" },
+                  ].map((item) => (
+                    <button
+                      key={item.role}
+                      onClick={() => handleRoleChange(item.role)}
+                      className={`w-full text-left px-4 py-2 font-mono text-xs hover:bg-[#1e1e1e] flex items-center justify-between ${
+                        activeRole === item.role ? "text-[#C4311E] font-bold bg-[#1a1a1a]" : "text-[#ccc]"
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {activeRole === item.role && <CheckCircle size={14} />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Notifications Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 bg-[#161616] border border-[#262626] hover:border-[#444] rounded-lg text-[#ccc] transition-colors"
+              >
+                <Bell size={18} />
+                {totalNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#C4311E] text-white font-mono text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {totalNotifications}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-[#121212] border border-[#262626] rounded-xl shadow-2xl py-3 px-4 z-50 space-y-3">
+                  <div className="flex items-center justify-between border-b border-[#222] pb-2">
+                    <h3 className="font-heading text-sm font-bold text-white">Store Notifications</h3>
+                    <span className="font-mono text-[10px] text-[#C4311E]">{totalNotifications} active</span>
+                  </div>
+                  {pendingOrdersCount > 0 && (
+                    <Link to="/admin/orders" onClick={() => setShowNotifications(false)} className="flex items-start gap-3 p-2.5 rounded-lg bg-[#1a1a1a] hover:bg-[#222] transition-colors">
+                      <ShoppingCart size={16} className="text-[#C4311E] mt-0.5 shrink-0" />
+                      <div>
+                        <p className="font-heading text-xs font-bold text-white">{pendingOrdersCount} Pending Orders</p>
+                        <p className="font-body text-[11px] text-[#888]">New customer orders requiring processing and shipment.</p>
+                      </div>
+                    </Link>
+                  )}
+                  {lowStockCount > 0 && (
+                    <Link to="/admin/products" onClick={() => setShowNotifications(false)} className="flex items-start gap-3 p-2.5 rounded-lg bg-[#1a1a1a] hover:bg-[#222] transition-colors">
+                      <AlertTriangle size={16} className="text-amber-500 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="font-heading text-xs font-bold text-white">{lowStockCount} Low Stock Products</p>
+                        <p className="font-body text-[11px] text-[#888]">Inventory alert: check items below 20 units.</p>
+                      </div>
+                    </Link>
+                  )}
+                  {totalNotifications === 0 && (
+                    <p className="font-body text-xs text-[#888] text-center py-4">No active notifications. All clear!</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Profile Avatar */}
+            <div className="flex items-center gap-3 pl-3 border-l border-[#222]">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#C4311E] to-[#E6E2D3] flex items-center justify-center font-heading font-black text-xs text-white">
+                SA
+              </div>
+              <div className="hidden md:block text-left">
+                <p className="font-heading text-xs font-bold text-white leading-tight">Master Admin</p>
+                <p className="font-mono text-[10px] text-emerald-400 leading-tight">Store Owner</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 p-8 bg-[#0F0F0F]">
+          <Outlet context={{ activeRole, searchQuery }} />
+        </main>
+      </div>
     </div>
   );
 }

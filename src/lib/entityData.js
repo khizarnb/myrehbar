@@ -137,3 +137,16 @@ export function useOrders() {
     staleTime: 1000 * 30,
   });
 }
+
+export function useCustomers() {
+  return useQuery({
+    queryKey: ['customers'],
+    queryFn: async () => {
+      if (db.entities.Customer && db.entities.Customer.list) {
+        return await db.entities.Customer.list();
+      }
+      return [];
+    },
+    staleTime: 1000 * 60,
+  });
+}
