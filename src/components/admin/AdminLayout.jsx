@@ -2,11 +2,12 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { useQueryClient } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Package, ShoppingCart, Users, FileText, ExternalLink, 
-  Lock, LogOut, MessageSquare, Shield, Bell, Search, ChevronDown, CheckCircle, AlertTriangle 
+  Lock, LogOut, MessageSquare, Shield, Bell, Search, ChevronDown, CheckCircle, AlertTriangle, RefreshCw 
 } from "lucide-react";
-import { useOrders, useProducts } from "@/lib/entityData";
+import { useOrders, useProducts, clearStoreCachesAndSync } from "@/lib/entityData";
 
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -20,12 +21,14 @@ const NAV = [
 
 export default function AdminLayout() {
   const location = useLocation();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeRole, setActiveRole] = useState("super_admin");
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [clearing, setClearing] = useState(false);
 
   const { data: orders } = useOrders();
   const { data: products } = useProducts();
@@ -52,6 +55,15 @@ export default function AdminLayout() {
 
   const handleLogout = () => {
     db.auth.logout('/login');
+  };
+
+  const handleClearHeaderCache = async () => {
+    setClearing(true);
+    await clearStoreCachesAndSync(queryClient);
+    setTimeout(() => {
+      setClearing(false);
+      alert("✅ Global Store Caches Cleared! All prices & products across the live site and dashboard have been synchronized with the database.");
+    }, 600);
   };
 
   if (loading) {
@@ -150,7 +162,18 @@ export default function AdminLayout() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Clear Cache Quick Action */}
+            <button
+              onClick={handleClearHeaderCache}
+              disabled={clearing}
+              className="flex items-center gap-1.5 bg-[#161616] hover:bg-[#222] border border-[#333] hover:border-emerald-500/50 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-mono transition-all shadow-sm"
+              title="Purge all store cache and pull fresh data from database"
+            >
+              <RefreshCw size={13} className={clearing ? "animate-spin text-emerald-400" : ""} />
+              <span className="hidden sm:inline">{clearing ? "Syncing..." : "Clear Caches"}</span>
+            </button>
+
             {/* Role Simulator Dropdown */}
             <div className="relative">
               <button

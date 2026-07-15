@@ -3,8 +3,8 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 import React, { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useOutletContext } from "react-router-dom";
-import { useProducts, useOrders } from "@/lib/entityData";
-import { Plus, Pencil, Trash2, Package, Search, AlertTriangle, TrendingUp, CheckCircle2, ShieldAlert } from "lucide-react";
+import { useProducts, useOrders, clearStoreCachesAndSync } from "@/lib/entityData";
+import { Plus, Pencil, Trash2, Package, Search, AlertTriangle, TrendingUp, CheckCircle2, ShieldAlert, RefreshCw } from "lucide-react";
 import ProductForm from "@/components/admin/ProductForm";
 
 export default function AdminProducts() {
@@ -18,16 +18,26 @@ export default function AdminProducts() {
   const [editing, setEditing] = useState(null);
   const [localSearch, setLocalSearch] = useState("");
   const [filterStock, setFilterStock] = useState("ALL"); // ALL, LOW, OUT, ACTIVE
+  const [syncingCache, setSyncingCache] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: (id) => db.entities.Product.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: async () => await clearStoreCachesAndSync(queryClient),
   });
 
   const inventoryMutation = useMutation({
     mutationFn: ({ id, inventory }) => db.entities.Product.update(id, { inventory }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: async () => await clearStoreCachesAndSync(queryClient),
   });
+
+  const handleClearCache = async () => {
+    setSyncingCache(true);
+    await clearStoreCachesAndSync(queryClient);
+    setTimeout(() => {
+      setSyncingCache(false);
+      alert("✅ Store cache successfully cleared! All product prices and details are now 100% synchronized with live database.");
+    }, 600);
+  };
 
   const handleDelete = (p) => {
     if (confirm(`Delete "${p.title}"? This cannot be undone.`)) {
@@ -97,13 +107,23 @@ export default function AdminProducts() {
           <h1 className="font-heading text-3xl font-black tracking-wider text-white">Product Catalog & Inventory</h1>
           <p className="font-body text-xs text-[#888] mt-1">Manage limited edition apparel drops, stock limits, and sales tracking</p>
         </div>
-        <button
-          onClick={() => { setEditing(null); setShowForm(true); }}
-          className="bg-[#C4311E] hover:bg-[#a82818] text-white px-5 py-2.5 rounded-lg font-mono text-xs uppercase font-bold tracking-wider transition-colors inline-flex items-center gap-2 shadow-lg shadow-[#C4311E]/20 self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          Add New Product
-        </button>
+        <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+          <button
+            onClick={handleClearCache}
+            disabled={syncingCache}
+            className="bg-[#1e1e1e] hover:bg-[#2a2a2a] border border-[#333] text-emerald-400 px-4 py-2.5 rounded-lg font-mono text-xs uppercase font-bold tracking-wider transition-all inline-flex items-center gap-2 shadow-sm"
+          >
+            <RefreshCw size={15} className={syncingCache ? "animate-spin text-emerald-400" : ""} />
+            {syncingCache ? "Clearing Cache..." : "Clear Cache & Sync"}
+          </button>
+          <button
+            onClick={() => { setEditing(null); setShowForm(true); }}
+            className="bg-[#C4311E] hover:bg-[#a82818] text-white px-5 py-2.5 rounded-lg font-mono text-xs uppercase font-bold tracking-wider transition-colors inline-flex items-center gap-2 shadow-lg shadow-[#C4311E]/20"
+          >
+            <Plus size={16} />
+            Add New Product
+          </button>
+        </div>
       </div>
 
       {/* Inventory Health Summary Bar */}

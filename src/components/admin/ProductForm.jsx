@@ -2,7 +2,7 @@ const db = globalThis.__B44_DB__ || { auth: { isAuthenticated: async () => false
 
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-
+import { clearStoreCachesAndSync } from '@/lib/entityData';
 import { X } from 'lucide-react';
 
 export default function ProductForm({ product, onClose }) {
@@ -37,8 +37,8 @@ export default function ProductForm({ product, onClose }) {
       }
       return await db.entities.Product.create(data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+    onSuccess: async () => {
+      await clearStoreCachesAndSync(queryClient);
       onClose();
     },
   });

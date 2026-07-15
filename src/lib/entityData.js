@@ -30,24 +30,46 @@ const getInitialJournal = () => {
   return fallbackJournal;
 };
 
+// Global helper function to purge all browser caches and force-refetch live database
+export async function clearStoreCachesAndSync(queryClient) {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('__rehbar_local_products__');
+    localStorage.removeItem('__rehbar_local_journals__');
+    sessionStorage.clear();
+  }
+  if (queryClient && queryClient.invalidateQueries) {
+    await queryClient.invalidateQueries({ queryKey: ['products'] });
+    await queryClient.invalidateQueries({ queryKey: ['journalArticles'] });
+    await queryClient.invalidateQueries({ queryKey: ['orders'] });
+    await queryClient.invalidateQueries({ queryKey: ['customers'] });
+  }
+  return true;
+}
+
 export function useProducts() {
   return useQuery({
     queryKey: ['products'],
     queryFn: async () => {
       const items = await db.entities.Product.list();
-      return items.map(p => ({
+      const formatted = items.map(p => ({
         ...p,
         specs: typeof p.specs === 'object' && p.specs !== null ? p.specs : (p.specs_json ? JSON.parse(p.specs_json) : {}),
         images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
       }));
+      if (typeof window !== 'undefined' && formatted.length > 0) {
+        localStorage.setItem('__rehbar_local_products__', JSON.stringify(formatted));
+      }
+      return formatted;
     },
     initialData: () => getInitialProducts().map(p => ({
       ...p,
       specs: typeof p.specs === 'object' && p.specs !== null ? p.specs : (p.specs_json ? JSON.parse(p.specs_json) : {}),
       images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
     })),
-    initialDataUpdatedAt: Date.now(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    // Setting staleTime: 0 so that initialData renders instantly at 0ms, BUT React Query always checks the database in the background immediately!
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -75,9 +97,9 @@ export function useProductBySlug(slug) {
         images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
       };
     },
-    initialDataUpdatedAt: Date.now(),
     enabled: !!slug,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 }
 
@@ -86,17 +108,21 @@ export function useJournalArticles() {
     queryKey: ['journalArticles'],
     queryFn: async () => {
       const items = await db.entities.JournalArticle.list();
-      return items.map(a => ({
+      const formatted = items.map(a => ({
         ...a,
         blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
       }));
+      if (typeof window !== 'undefined' && formatted.length > 0) {
+        localStorage.setItem('__rehbar_local_journals__', JSON.stringify(formatted));
+      }
+      return formatted;
     },
     initialData: () => getInitialJournal().map(a => ({
       ...a,
       blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
     })),
-    initialDataUpdatedAt: Date.now(),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 }
 
@@ -122,9 +148,9 @@ export function useJournalArticleBySlug(slug) {
         blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
       };
     },
-    initialDataUpdatedAt: Date.now(),
     enabled: !!slug,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 }
 
@@ -134,7 +160,8 @@ export function useOrders() {
     queryFn: async () => {
       return await db.entities.Order.list('-created_date');
     },
-    staleTime: 1000 * 30,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 }
 
@@ -147,6 +174,7 @@ export function useCustomers() {
       }
       return [];
     },
-    staleTime: 1000 * 60,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 }
