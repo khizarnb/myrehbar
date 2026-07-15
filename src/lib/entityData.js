@@ -41,11 +41,12 @@ export function useProducts() {
         images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
       }));
     },
-    placeholderData: () => getInitialProducts().map(p => ({
+    initialData: () => getInitialProducts().map(p => ({
       ...p,
       specs: typeof p.specs === 'object' && p.specs !== null ? p.specs : (p.specs_json ? JSON.parse(p.specs_json) : {}),
       images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
     })),
+    initialDataUpdatedAt: Date.now(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
@@ -63,7 +64,7 @@ export function useProductBySlug(slug) {
         images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
       };
     },
-    placeholderData: () => {
+    initialData: () => {
       if (!slug) return undefined;
       const list = getInitialProducts();
       const p = list.find(item => item.slug === slug || item.id === slug);
@@ -74,6 +75,7 @@ export function useProductBySlug(slug) {
         images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
       };
     },
+    initialDataUpdatedAt: Date.now(),
     enabled: !!slug,
     staleTime: 1000 * 60 * 5,
   });
@@ -89,10 +91,11 @@ export function useJournalArticles() {
         blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
       }));
     },
-    placeholderData: () => getInitialJournal().map(a => ({
+    initialData: () => getInitialJournal().map(a => ({
       ...a,
       blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
     })),
+    initialDataUpdatedAt: Date.now(),
     staleTime: 1000 * 60 * 5,
   });
 }
@@ -109,7 +112,7 @@ export function useJournalArticleBySlug(slug) {
         blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
       };
     },
-    placeholderData: () => {
+    initialData: () => {
       if (!slug) return undefined;
       const list = getInitialJournal();
       const a = list.find(item => item.slug === slug || item.id === slug);
@@ -119,6 +122,7 @@ export function useJournalArticleBySlug(slug) {
         blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
       };
     },
+    initialDataUpdatedAt: Date.now(),
     enabled: !!slug,
     staleTime: 1000 * 60 * 5,
   });

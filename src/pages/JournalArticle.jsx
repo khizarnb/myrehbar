@@ -11,7 +11,7 @@ export default function JournalArticle() {
   const { data: article, isLoading } = useJournalArticleBySlug(slug);
   const { data: products } = useProducts();
 
-  if (isLoading) {
+  if (isLoading && !article) {
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-[#333] border-t-[#C4311E] rounded-full animate-spin"></div>

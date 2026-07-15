@@ -29,7 +29,7 @@ export default function ProductDetail() {
     navigate("/checkout");
   };
 
-  if (isLoading) {
+  if (isLoading && !product) {
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-[#333] border-t-[#C4311E] rounded-full animate-spin"></div>
