@@ -234,18 +234,19 @@ export const db = {
         }
         let updated = null;
         if (supabase) {
+          const { id: _ignoreId, created_at: _ignoreCa, ...cleanDbPayload } = payload;
           // First try updating by id
-          let res = await supabase.from('products').update(payload).eq('id', id).select().single();
+          let res = await supabase.from('products').update(cleanDbPayload).eq('id', id).select().single();
           if (!res.error && res.data) {
             updated = res.data;
           } else {
             // Try updating by slug if id was slug or uuid mismatch
             const slugToTry = payload.slug || id;
-            res = await supabase.from('products').update(payload).eq('slug', slugToTry).select().single();
+            res = await supabase.from('products').update(cleanDbPayload).eq('slug', slugToTry).select().single();
             if (!res.error && res.data) {
               updated = res.data;
             } else if (res.error) {
-              console.warn(`[Supabase Update Notice] Supabase DB update for product ${id} skipped/blocked by RLS (${res.error.message}), saving to live store:`, res.error);
+              console.warn(`[Supabase Update Notice] Supabase DB update for product ${id} skipped/blocked by RLS or schema (${res.error.message}), saving to live store:`, res.error);
             }
           }
         }

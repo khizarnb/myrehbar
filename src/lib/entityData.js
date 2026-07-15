@@ -30,9 +30,9 @@ const getInitialJournal = () => {
   return fallbackJournal;
 };
 
-// Global helper function to purge all browser caches and force-refetch live database
-export async function clearStoreCachesAndSync(queryClient) {
-  if (typeof window !== 'undefined') {
+// Global helper function to invalidate query caches and optionally purge local storage
+export async function clearStoreCachesAndSync(queryClient, purgeLocal = false) {
+  if (typeof window !== 'undefined' && purgeLocal === true) {
     localStorage.removeItem('__rehbar_local_products__');
     localStorage.removeItem('__rehbar_local_journals__');
     sessionStorage.clear();
