@@ -22,17 +22,17 @@ export default function AdminProducts() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => db.entities.Product.delete(id),
-    onSuccess: async () => await clearStoreCachesAndSync(queryClient),
+    onSuccess: async () => await clearStoreCachesAndSync(queryClient, true),
   });
 
   const inventoryMutation = useMutation({
     mutationFn: ({ id, inventory }) => db.entities.Product.update(id, { inventory }),
-    onSuccess: async () => await clearStoreCachesAndSync(queryClient),
+    onSuccess: async () => await clearStoreCachesAndSync(queryClient, true),
   });
 
   const handleClearCache = async () => {
     setSyncingCache(true);
-    await clearStoreCachesAndSync(queryClient);
+    await clearStoreCachesAndSync(queryClient, true);
     setTimeout(() => {
       setSyncingCache(false);
       alert("✅ Store cache successfully cleared! All product prices and details are now 100% synchronized with live database.");

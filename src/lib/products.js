@@ -5,7 +5,7 @@ export const products = [
     "slug": "rehbar",
     "title": "REHBAR",
     "subtitle": "THE VANGUARD",
-    "price": 50,
+    "price": 40,
     "edition": "100",
     "description": "A masterwork of leadership and vision. This design captures the 'Rehbar' (The Guide) — full-size calligraphic print across the chest. Crafted on premium heavyweight cotton, it represents the unwavering light of guidance in times of obscurity. Only 100 made. When they're gone, they're gone.",
     "specs": {
@@ -32,7 +32,7 @@ export const products = [
     "slug": "sejjil",
     "title": "SEJJIL",
     "subtitle": "THE IMPACT",
-    "price": 50,
+    "price": 40,
     "edition": "Limited",
     "description": "Inspired by the historical significance of resilience and divine intervention. Sejjil is a study of force and destiny. The cracked-earth texture within the crimson circle conveys unstoppable momentum — the moment where the small overcomes the monolithic. Exclusive Edition.",
     "specs": {
@@ -59,7 +59,7 @@ export const products = [
     "slug": "khyber-shikan",
     "title": "KHYBER SHIKAN",
     "subtitle": "THE TRAILBLAZER",
-    "price": 50,
+    "price": 40,
     "edition": "Limited",
     "description": "A tribute to the indomitable spirit of the Khyber. This piece is an exercise in structural power and the breaking of barriers. The sweeping calligraphic blade on the back with the subtle Rehbar emblem at the chest — designed for spaces that demand a presence of strength. Exclusive Edition.",
     "specs": {

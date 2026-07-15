@@ -59,7 +59,7 @@ export default function AdminLayout() {
 
   const handleClearHeaderCache = async () => {
     setClearing(true);
-    await clearStoreCachesAndSync(queryClient);
+    await clearStoreCachesAndSync(queryClient, true);
     setTimeout(() => {
       setClearing(false);
       alert("✅ Global Store Caches Cleared! All prices & products across the live site and dashboard have been synchronized with the database.");

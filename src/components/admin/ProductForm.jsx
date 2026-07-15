@@ -38,7 +38,7 @@ export default function ProductForm({ product, onClose }) {
       return await db.entities.Product.create(data);
     },
     onSuccess: async () => {
-      await clearStoreCachesAndSync(queryClient);
+      await clearStoreCachesAndSync(queryClient, true);
       onClose();
     },
   });

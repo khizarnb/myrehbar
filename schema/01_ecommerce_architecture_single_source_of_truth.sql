@@ -102,11 +102,13 @@ CREATE TABLE IF NOT EXISTS public.journal_articles (
 -- =========================================================================
 -- 5. CONFIGURE RLS (ROW LEVEL SECURITY) FOR UNIVERSAL DIRECT CRUD ACCESS
 -- =========================================================================
+-- Enable RLS and drop restrictive policies that block updates when logged in via custom master admin email
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.journal_articles ENABLE ROW LEVEL SECURITY;
 
+-- Drop old conflicting policies
 DROP POLICY IF EXISTS "Public can view products" ON public.products;
 DROP POLICY IF EXISTS "Authenticated users can manage products" ON public.products;
 DROP POLICY IF EXISTS "Allow public read products" ON public.products;
@@ -125,6 +127,7 @@ DROP POLICY IF EXISTS "Authenticated users can manage journal articles" ON publi
 DROP POLICY IF EXISTS "Allow public read journal" ON public.journal_articles;
 DROP POLICY IF EXISTS "Allow all manage journal" ON public.journal_articles;
 
+-- Create universal, unblocked policies for single-source-of-truth real-time e-commerce architecture
 CREATE POLICY "Universal Read Products" ON public.products FOR SELECT USING (true);
 CREATE POLICY "Universal Write Products" ON public.products FOR ALL USING (true);
 
@@ -137,6 +140,7 @@ CREATE POLICY "Universal Write Contact Messages" ON public.contact_messages FOR 
 CREATE POLICY "Universal Read Journal" ON public.journal_articles FOR SELECT USING (true);
 CREATE POLICY "Universal Write Journal" ON public.journal_articles FOR ALL USING (true);
 
+-- Ensure media bucket exists and allows universal upload/access
 INSERT INTO storage.buckets (id, name, public) VALUES ('media', 'media', true) ON CONFLICT (id) DO UPDATE SET public = true;
 DROP POLICY IF EXISTS "Public access to media bucket" ON storage.objects;
 DROP POLICY IF EXISTS "Authenticated users can upload media" ON storage.objects;

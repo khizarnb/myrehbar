@@ -3,7 +3,7 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 import React, { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useOutletContext } from "react-router-dom";
-import { useOrders } from "@/lib/entityData";
+import { useOrders, clearStoreCachesAndSync } from "@/lib/entityData";
 import { 
   ShoppingCart, Eye, X, Download, Search, Filter, ArrowUpDown, 
   Trash2, CheckCircle, AlertCircle, FileSpreadsheet, ChevronLeft, ChevronRight, ShieldAlert 
@@ -31,15 +31,23 @@ export default function AdminOrders() {
       ...(status ? { status } : {}), 
       ...(payment_status ? { payment_status } : {}) 
     }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['orders'] }),
+    onSuccess: async () => {
+      await clearStoreCachesAndSync(queryClient, true);
+    },
+    onError: (err) => {
+      alert(`❌ Order update failed: ${err.message || "Could not update order in Supabase"}`);
+    }
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => db.entities.Order.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    onSuccess: async () => {
+      await clearStoreCachesAndSync(queryClient, true);
       setViewing(null);
     },
+    onError: (err) => {
+      alert(`❌ Order deletion failed: ${err.message || "Could not delete order in Supabase"}`);
+    }
   });
 
   const parseItems = (o) => {

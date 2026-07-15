@@ -1,36 +1,8 @@
 const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
 
 import { useQuery } from '@tanstack/react-query';
-import { products as fallbackProducts } from '@/lib/products';
-import { journalArticles as fallbackJournal } from '@/lib/journal';
 
-const getInitialProducts = () => {
-  if (typeof window !== 'undefined') {
-    const local = localStorage.getItem('__rehbar_local_products__');
-    if (local) {
-      try {
-        const parsed = JSON.parse(local);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch {}
-    }
-  }
-  return fallbackProducts;
-};
-
-const getInitialJournal = () => {
-  if (typeof window !== 'undefined') {
-    const local = localStorage.getItem('__rehbar_local_journals__');
-    if (local) {
-      try {
-        const parsed = JSON.parse(local);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch {}
-    }
-  }
-  return fallbackJournal;
-};
-
-// Global helper function to invalidate query caches and optionally purge local storage
+// Global helper function to invalidate query caches and trigger real-time re-fetch from database
 export async function clearStoreCachesAndSync(queryClient, purgeLocal = false) {
   if (typeof window !== 'undefined' && purgeLocal === true) {
     localStorage.removeItem('__rehbar_local_products__');
@@ -51,22 +23,12 @@ export function useProducts() {
     queryKey: ['products'],
     queryFn: async () => {
       const items = await db.entities.Product.list();
-      const formatted = items.map(p => ({
+      return items.map(p => ({
         ...p,
         specs: typeof p.specs === 'object' && p.specs !== null ? p.specs : (p.specs_json ? JSON.parse(p.specs_json) : {}),
         images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
       }));
-      if (typeof window !== 'undefined' && formatted.length > 0) {
-        localStorage.setItem('__rehbar_local_products__', JSON.stringify(formatted));
-      }
-      return formatted;
     },
-    initialData: () => getInitialProducts().map(p => ({
-      ...p,
-      specs: typeof p.specs === 'object' && p.specs !== null ? p.specs : (p.specs_json ? JSON.parse(p.specs_json) : {}),
-      images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
-    })),
-    // Setting staleTime: 0 so that initialData renders instantly at 0ms, BUT React Query always checks the database in the background immediately!
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
@@ -78,19 +40,17 @@ export function useProductBySlug(slug) {
     queryKey: ['products', slug],
     queryFn: async () => {
       const items = await db.entities.Product.filter({ slug });
-      if (!items.length) return null;
+      if (!items || !items.length) {
+        // Fallback check by id
+        const byId = await db.entities.Product.get(slug);
+        if (!byId) return null;
+        return {
+          ...byId,
+          specs: typeof byId.specs === 'object' && byId.specs !== null ? byId.specs : (byId.specs_json ? JSON.parse(byId.specs_json) : {}),
+          images: Array.isArray(byId.images) ? byId.images : (byId.images_json ? JSON.parse(byId.images_json) : []),
+        };
+      }
       const p = items[0];
-      return {
-        ...p,
-        specs: typeof p.specs === 'object' && p.specs !== null ? p.specs : (p.specs_json ? JSON.parse(p.specs_json) : {}),
-        images: Array.isArray(p.images) ? p.images : (p.images_json ? JSON.parse(p.images_json) : []),
-      };
-    },
-    initialData: () => {
-      if (!slug) return undefined;
-      const list = getInitialProducts();
-      const p = list.find(item => item.slug === slug || item.id === slug);
-      if (!p) return undefined;
       return {
         ...p,
         specs: typeof p.specs === 'object' && p.specs !== null ? p.specs : (p.specs_json ? JSON.parse(p.specs_json) : {}),
@@ -108,19 +68,11 @@ export function useJournalArticles() {
     queryKey: ['journalArticles'],
     queryFn: async () => {
       const items = await db.entities.JournalArticle.list();
-      const formatted = items.map(a => ({
+      return items.map(a => ({
         ...a,
         blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
       }));
-      if (typeof window !== 'undefined' && formatted.length > 0) {
-        localStorage.setItem('__rehbar_local_journals__', JSON.stringify(formatted));
-      }
-      return formatted;
     },
-    initialData: () => getInitialJournal().map(a => ({
-      ...a,
-      blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
-    })),
     staleTime: 0,
     refetchOnMount: true,
   });
@@ -133,16 +85,6 @@ export function useJournalArticleBySlug(slug) {
       const items = await db.entities.JournalArticle.filter({ slug });
       if (!items.length) return null;
       const a = items[0];
-      return {
-        ...a,
-        blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
-      };
-    },
-    initialData: () => {
-      if (!slug) return undefined;
-      const list = getInitialJournal();
-      const a = list.find(item => item.slug === slug || item.id === slug);
-      if (!a) return undefined;
       return {
         ...a,
         blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),

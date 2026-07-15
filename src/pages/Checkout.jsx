@@ -239,10 +239,10 @@ const CHARITIES = [
   { name: "Charity of your choice", category: "Custom Donation" },
 ];
 const COUNTRY_OPTIONS = [
-  { code: "US", name: "United States ($10 USD Shipping)", cost: 10 },
-  { code: "CA", name: "Canada ($10 USD Shipping)", cost: 10 },
-  { code: "GB", name: "United Kingdom ($15 USD Shipping)", cost: 15 },
-  { code: "ROW", name: "Rest of World ($15 USD Shipping)", cost: 15 },
+  { code: "US", name: "United States", cost: 10 },
+  { code: "CA", name: "Canada", cost: 10 },
+  { code: "GB", name: "United Kingdom", cost: 15 },
+  { code: "ROW", name: "Rest of World", cost: 15 },
 ];
 const getShippingCost = (country) => {
   if (country === "GB" || country === "ROW" || country === "United Kingdom" || country === "Rest of World") return 15;

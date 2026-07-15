@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-import { products as fallbackProducts } from '@/lib/products';
+import { products as initialSeedProducts } from '@/lib/products';
 import { journalArticles as fallbackJournal } from '@/lib/journal';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ztaisbdcndxtgjfjswkg.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_w9LzlsQRfrKglfvxIPVtYQ_Ng-bfAV0';
 
 export const supabase = (supabaseUrl && supabaseKey)
   ? createClient(supabaseUrl, supabaseKey)
@@ -147,40 +147,23 @@ export const db = {
   entities: {
     Product: {
       list: async () => {
-        let list = [];
-        if (supabase) {
-          const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-          if (!error && data && data.length > 0) {
-            list = data;
-          }
-        }
-        if (!list.length) {
-          list = fallbackProducts;
-        }
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_products__');
-          if (local) {
-            try {
-              const parsedLocal = JSON.parse(local);
-              if (Array.isArray(parsedLocal) && parsedLocal.length > 0) {
-                const mergedMap = new Map();
-                list.forEach(item => {
-                  mergedMap.set(String(item.id || item.slug), item);
-                });
-                parsedLocal.forEach(localItem => {
-                  const key = String(localItem.id || localItem.slug);
-                  if (mergedMap.has(key)) {
-                    mergedMap.set(key, { ...mergedMap.get(key), ...localItem });
-                  } else {
-                    mergedMap.set(key, localItem);
-                  }
-                });
-                return Array.from(mergedMap.values());
-              }
-            } catch {}
-          }
-        }
-        return list;
+        // Product details are static (updated via code/prompts as requested)
+        return initialSeedProducts.map(p => ({
+          ...p,
+          title: p.title || p.name || 'Untitled Product',
+          name: p.name || p.title || 'Untitled Product',
+          inventory: p.inventory !== undefined && p.inventory !== null ? p.inventory : (p.stock !== undefined && p.stock !== null ? p.stock : 100),
+          stock: p.stock !== undefined && p.stock !== null ? p.stock : (p.inventory !== undefined && p.inventory !== null ? p.inventory : 100),
+          price: Number(p.price || 0),
+          compare_at_price: Number(p.compare_at_price || 0),
+          heroImage: p.heroImage || p.image || (Array.isArray(p.images) ? p.images[0] : ''),
+          image: p.image || p.heroImage || (Array.isArray(p.images) ? p.images[0] : ''),
+          gallery: Array.isArray(p.gallery) && p.gallery.length ? p.gallery : (Array.isArray(p.images) ? p.images : []),
+          images: Array.isArray(p.images) && p.images.length ? p.images : (Array.isArray(p.gallery) ? p.gallery : []),
+          category: p.category || 'Apparel',
+          status: p.status || (p.active ? 'active' : 'draft'),
+          active: p.active !== undefined ? p.active : (p.status !== 'draft')
+        }));
       },
       filter: async (query) => {
         let list = await db.entities.Product.list();
@@ -194,275 +177,74 @@ export const db = {
         return list.find(p => String(p.id) === String(id) || String(p.slug) === String(id)) || null;
       },
       create: async (data) => {
-        const payload = { ...data };
-        if (payload.specs_json) {
-          try { payload.specs = JSON.parse(payload.specs_json); } catch {}
-          delete payload.specs_json;
-        }
-        if (payload.images_json) {
-          try { payload.images = JSON.parse(payload.images_json); } catch {}
-          delete payload.images_json;
-        }
-        if (supabase) {
-          const { data: created, error } = await supabase.from('products').insert([payload]).select().single();
-          if (!error && created) {
-            if (typeof window !== 'undefined') {
-              let list = await db.entities.Product.list();
-              list = [created, ...list.filter(p => p.id !== created.id)];
-              localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
-            }
-            return created;
-          } else if (error) {
-            console.warn('[Supabase Product Create Error]', error);
-          }
-        }
-        let list = await db.entities.Product.list();
-        const newItem = { id: 'prod_' + Date.now(), ...payload };
-        list.unshift(newItem);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
-        return newItem;
+        const payload = { id: 'prod_' + Date.now(), ...data };
+        initialSeedProducts.unshift(payload);
+        return payload;
       },
       update: async (id, data) => {
-        const payload = { ...data };
-        if (payload.specs_json) {
-          try { payload.specs = JSON.parse(payload.specs_json); } catch {}
-          delete payload.specs_json;
+        const idx = initialSeedProducts.findIndex(p => String(p.id) === String(id) || String(p.slug) === String(id));
+        if (idx !== -1) {
+          initialSeedProducts[idx] = { ...initialSeedProducts[idx], ...data };
+          return initialSeedProducts[idx];
         }
-        if (payload.images_json) {
-          try { payload.images = JSON.parse(payload.images_json); } catch {}
-          delete payload.images_json;
-        }
-        let updated = null;
-        if (supabase) {
-          const { id: _ignoreId, created_at: _ignoreCa, ...cleanDbPayload } = payload;
-          // First try updating by id
-          let res = await supabase.from('products').update(cleanDbPayload).eq('id', id).select().single();
-          if (!res.error && res.data) {
-            updated = res.data;
-          } else {
-            // Try updating by slug if id was slug or uuid mismatch
-            const slugToTry = payload.slug || id;
-            res = await supabase.from('products').update(cleanDbPayload).eq('slug', slugToTry).select().single();
-            if (!res.error && res.data) {
-              updated = res.data;
-            } else if (res.error) {
-              console.warn(`[Supabase Update Notice] Supabase DB update for product ${id} skipped/blocked by RLS or schema (${res.error.message}), saving to live store:`, res.error);
-            }
-          }
-        }
-        // Update local storage and return merged result so live site updates instantly
-        let list = await db.entities.Product.list();
-        list = list.map(p => (String(p.id) === String(id) || String(p.slug) === String(id) || (updated && (p.id === updated.id || p.slug === updated.slug))) ? { ...p, ...payload, ...(updated || {}) } : p);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
-        return list.find(p => String(p.id) === String(id) || String(p.slug) === String(id)) || { id, ...payload };
+        return { id, ...data };
       },
       delete: async (id) => {
-        if (supabase) {
-          await supabase.from('products').delete().eq('id', id);
-          await supabase.from('products').delete().eq('slug', id);
+        const idx = initialSeedProducts.findIndex(p => String(p.id) === String(id) || String(p.slug) === String(id));
+        if (idx !== -1) {
+          initialSeedProducts.splice(idx, 1);
         }
-        let list = await db.entities.Product.list();
-        list = list.filter(p => String(p.id) !== String(id) && String(p.slug) !== String(id));
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_products__', JSON.stringify(list));
         return { success: true };
       }
     },
     Order: {
       list: async () => {
-        let remoteOrders = [];
         if (supabase) {
           const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-          if (!error && data && data.length > 0) remoteOrders = data;
-        }
-        let localOrders = [];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_orders__');
-          if (local) { try { localOrders = JSON.parse(local); } catch {} }
-        }
-        const seedOrders = [
-          {
-            id: 'ord_seed1',
-            order_number: 'ORD-98421',
-            customer_name: 'Hamza Malik',
-            customer_email: 'hamza.malik@example.com',
-            customer_phone: '+1 416 555 0192',
-            shipping_address: '142 Queen St W',
-            shipping_city: 'Toronto',
-            shipping_country: 'Canada',
-            shipping_zip: 'M5H 2N2',
-            items_json: JSON.stringify([{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 2, size: 'L' }]),
-            items: [{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 2, size: 'L' }],
-            subtotal: 300,
-            shipping_cost: 10,
-            charity_donation: 12,
-            total: 310,
-            status: 'fulfilled',
-            payment_status: 'paid',
-            payment_method: 'Stripe Credit Card',
-            created_date: new Date(Date.now() - 3600000 * 12).toISOString(),
-            created_at: new Date(Date.now() - 3600000 * 12).toISOString()
-          },
-          {
-            id: 'ord_seed2',
-            order_number: 'ORD-98394',
-            customer_name: 'Sara Ahmed',
-            customer_email: 'sara.ahmed@example.org',
-            customer_phone: '+44 20 7946 0921',
-            shipping_address: '88 Knightsbridge',
-            shipping_city: 'London',
-            shipping_country: 'United Kingdom',
-            shipping_zip: 'SW1X 7RB',
-            items_json: JSON.stringify([{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'M' }]),
-            items: [{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'M' }],
-            subtotal: 150,
-            shipping_cost: 15,
-            charity_donation: 6,
-            total: 165,
-            status: 'pending',
-            payment_status: 'paid',
-            payment_method: 'PayPal Express',
-            created_date: new Date(Date.now() - 3600000 * 36).toISOString(),
-            created_at: new Date(Date.now() - 3600000 * 36).toISOString()
-          },
-          {
-            id: 'ord_seed3',
-            order_number: 'ORD-98350',
-            customer_name: 'Tariq Aziz',
-            customer_email: 'tariq.aziz@example.com',
-            customer_phone: '+1 212 555 0143',
-            shipping_address: '350 5th Ave',
-            shipping_city: 'New York',
-            shipping_country: 'USA',
-            shipping_zip: '10118',
-            items_json: JSON.stringify([{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 3, size: 'XL' }]),
-            items: [{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 3, size: 'XL' }],
-            subtotal: 450,
-            shipping_cost: 10,
-            charity_donation: 18,
-            total: 460,
-            status: 'shipped',
-            payment_status: 'paid',
-            payment_method: 'Stripe Apple Pay',
-            created_date: new Date(Date.now() - 3600000 * 72).toISOString(),
-            created_at: new Date(Date.now() - 3600000 * 72).toISOString()
-          },
-          {
-            id: 'ord_seed4',
-            order_number: 'ORD-98288',
-            customer_name: 'Layla Al-Mansoor',
-            customer_email: 'layla.m@example.net',
-            customer_phone: '+971 50 123 4567',
-            shipping_address: 'Downtown Dubai Tower 2',
-            shipping_city: 'Dubai',
-            shipping_country: 'United Arab Emirates',
-            shipping_zip: '00000',
-            items_json: JSON.stringify([{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'S' }]),
-            items: [{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'S' }],
-            subtotal: 150,
-            shipping_cost: 15,
-            charity_donation: 6,
-            total: 165,
-            status: 'fulfilled',
-            payment_status: 'paid',
-            payment_method: 'Stripe Credit Card',
-            created_date: new Date(Date.now() - 3600000 * 140).toISOString(),
-            created_at: new Date(Date.now() - 3600000 * 140).toISOString()
-          },
-          {
-            id: 'ord_seed5',
-            order_number: 'ORD-98150',
-            customer_name: 'Omar Farooq',
-            customer_email: 'omar.f@example.com',
-            customer_phone: '+1 604 555 0188',
-            shipping_address: '1055 W Georgia St',
-            shipping_city: 'Vancouver',
-            shipping_country: 'Canada',
-            shipping_zip: 'V6E 3P3',
-            items_json: JSON.stringify([{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 2, size: 'M' }]),
-            items: [{ id: 'vanguard', title: 'THE VANGUARD', price: 150, quantity: 2, size: 'M' }],
-            subtotal: 300,
-            shipping_cost: 10,
-            charity_donation: 12,
-            total: 310,
-            status: 'cancelled',
-            payment_status: 'refunded',
-            payment_method: 'Stripe Credit Card',
-            created_date: new Date(Date.now() - 3600000 * 280).toISOString(),
-            created_at: new Date(Date.now() - 3600000 * 280).toISOString()
-          },
-          {
-            id: 'ord_seed6',
-            order_number: 'ORD-98012',
-            customer_name: 'Amina Yusuf',
-            customer_email: 'amina.y@example.org',
-            customer_phone: '+44 161 496 0311',
-            shipping_address: '12 Deansgate',
-            shipping_city: 'Manchester',
-            shipping_country: 'United Kingdom',
-            shipping_zip: 'M3 1BZ',
-            items_json: JSON.stringify([{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'L' }]),
-            items: [{ id: 'nomad', title: 'THE NOMAD', price: 150, quantity: 1, size: 'L' }],
-            subtotal: 150,
-            shipping_cost: 15,
-            charity_donation: 6,
-            total: 165,
-            status: 'fulfilled',
-            payment_status: 'paid',
-            payment_method: 'PayPal Express',
-            created_date: new Date(Date.now() - 3600000 * 432).toISOString(),
-            created_at: new Date(Date.now() - 3600000 * 432).toISOString()
+          if (!error && data) {
+            return data;
           }
-        ];
-
-        // Combine all store orders uniquely by ID/Order Number
-        const map = new Map();
-        seedOrders.forEach(o => map.set(o.order_number, o));
-        remoteOrders.forEach(o => map.set(o.order_number, { ...map.get(o.order_number), ...o }));
-        localOrders.forEach(o => map.set(o.order_number, { ...map.get(o.order_number), ...o }));
-
-        return Array.from(map.values()).sort((a, b) => new Date(b.created_date || b.created_at || 0) - new Date(a.created_date || a.created_at || 0));
+          if (error) {
+            console.error('[Supabase Order List Error]', error);
+          }
+          return [];
+        }
+        return [];
       },
       create: async (data) => {
         if (supabase) {
           const { data: created, error } = await supabase.from('orders').insert([data]).select().single();
           if (!error && created) return created;
+          if (error) throw new Error(`Order database insert failed: ${error.message}`);
         }
-        let list = [];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_orders__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        const newItem = { id: 'ord_' + Date.now(), payment_status: 'paid', payment_method: 'Stripe Credit Card', ...data };
-        list.unshift(newItem);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_orders__', JSON.stringify(list));
-        return newItem;
+        throw new Error('Supabase database not connected.');
       },
       update: async (id, data) => {
         if (supabase) {
-          const { data: updated, error } = await supabase.from('orders').update(data).eq('id', id).select().single();
+          let { data: updated, error } = await supabase.from('orders').update(data).eq('id', id).select().single();
+          if (error || !updated) {
+            const res2 = await supabase.from('orders').update(data).eq('order_number', id).select().single();
+            updated = res2.data;
+            error = res2.error;
+          }
           if (!error && updated) return updated;
+          throw new Error(`Order database update failed: ${error?.message || "Order ID/Number not matched in Supabase orders table"}`);
         }
-        let list = [];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_orders__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        list = list.map(o => (o.id === id || o.order_number === id) ? { ...o, ...data } : o);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_orders__', JSON.stringify(list));
-        return list.find(o => o.id === id || o.order_number === id) || { id, ...data };
+        throw new Error('Supabase database not connected.');
       },
       delete: async (id) => {
         if (supabase) {
-          await supabase.from('orders').delete().eq('id', id);
+          const res1 = await supabase.from('orders').delete().eq('id', id);
+          if (res1.error) {
+            const res2 = await supabase.from('orders').delete().eq('order_number', id);
+            if (res2.error) throw new Error(`Order database delete failed: ${res2.error.message}`);
+          } else {
+            // Also attempt deleting by order_number in case id passed was order_number
+            await supabase.from('orders').delete().eq('order_number', id);
+          }
+          return { success: true };
         }
-        let list = [];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_orders__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        list = list.filter(o => o.id !== id && o.order_number !== id);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_orders__', JSON.stringify(list));
-        return { success: true };
+        throw new Error('Supabase database not connected.');
       }
     },
     Customer: {
@@ -520,11 +302,7 @@ export const db = {
       list: async () => {
         if (supabase) {
           const { data, error } = await supabase.from('journal_articles').select('*').order('created_at', { ascending: false });
-          if (!error && data && data.length > 0) return data;
-        }
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_journals__');
-          if (local) { try { return JSON.parse(local); } catch {} }
+          if (!error && data) return data;
         }
         return fallbackJournal;
       },
@@ -533,15 +311,7 @@ export const db = {
           const { data, error } = await supabase.from('journal_articles').select('*').eq('slug', query.slug);
           if (!error && data && data.length > 0) return data;
         }
-        let list = fallbackJournal;
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_journals__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        if (query?.slug) {
-          return list.filter(a => a.slug === query.slug);
-        }
-        return list;
+        return fallbackJournal.filter(a => !query?.slug || a.slug === query.slug);
       },
       create: async (data) => {
         const payload = { ...data };
@@ -552,16 +322,9 @@ export const db = {
         if (supabase) {
           const { data: created, error } = await supabase.from('journal_articles').insert([payload]).select().single();
           if (!error && created) return created;
+          if (error) throw new Error(`Journal database insert failed: ${error.message}`);
         }
-        let list = [...fallbackJournal];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_journals__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        const newItem = { id: 'art_' + Date.now(), ...payload };
-        list.unshift(newItem);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_journals__', JSON.stringify(list));
-        return newItem;
+        throw new Error('Supabase database not connected.');
       },
       update: async (id, data) => {
         const payload = { ...data };
@@ -572,28 +335,16 @@ export const db = {
         if (supabase) {
           const { data: updated, error } = await supabase.from('journal_articles').update(payload).eq('id', id).select().single();
           if (!error && updated) return updated;
+          if (error) throw new Error(`Journal database update failed: ${error.message}`);
         }
-        let list = [...fallbackJournal];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_journals__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        list = list.map(a => a.id === id ? { ...a, ...payload } : a);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_journals__', JSON.stringify(list));
-        return list.find(a => a.id === id) || { id, ...payload };
+        throw new Error('Supabase database not connected.');
       },
       delete: async (id) => {
         if (supabase) {
           await supabase.from('journal_articles').delete().eq('id', id);
+          return { success: true };
         }
-        let list = [...fallbackJournal];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_journals__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        list = list.filter(a => a.id !== id);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_journals__', JSON.stringify(list));
-        return { success: true };
+        throw new Error('Supabase database not connected.');
       }
     },
     ContactMessage: {
@@ -602,84 +353,29 @@ export const db = {
           const { data, error } = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false });
           if (!error && data) return data;
         }
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_messages__');
-          if (local) { try { return JSON.parse(local); } catch {} }
-        }
-        return [
-          {
-            id: 'msg_sample1',
-            name: 'Ahmad Khan',
-            email: 'ahmad.k@example.com',
-            message: 'Hello, what is the exact GSM and material blend used for THE VANGUARD oversized t-shirt? Looking to place a bulk custom order.',
-            created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-            read: false
-          },
-          {
-            id: 'msg_sample2',
-            name: 'Zainab Bilal',
-            email: 'zainab@example.org',
-            message: 'Do you ship to Dubai and what are the expected customs timelines for limited edition drops?',
-            created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-            read: true
-          }
-        ];
+        return [];
       },
       create: async (data) => {
         if (supabase) {
           const { data: created, error } = await supabase.from('contact_messages').insert([data]).select().single();
           if (!error && created) return created;
         }
-        let list = [];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_messages__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-          else {
-            list = [
-              {
-                id: 'msg_sample1',
-                name: 'Ahmad Khan',
-                email: 'ahmad.k@example.com',
-                message: 'Hello, what is the exact GSM and material blend used for THE VANGUARD oversized t-shirt? Looking to place a bulk custom order.',
-                created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-                read: false
-              }
-            ];
-          }
-        }
-        const newItem = { id: 'msg_' + Date.now(), read: false, ...data };
-        list.unshift(newItem);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_messages__', JSON.stringify(list));
-        return newItem;
+        return { id: 'msg_' + Date.now(), read: false, ...data };
       },
       update: async (id, data) => {
         if (supabase) {
           const { data: updated, error } = await supabase.from('contact_messages').update(data).eq('id', id).select().single();
           if (!error && updated) return updated;
         }
-        let list = [];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_messages__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        list = list.map(m => m.id === id ? { ...m, ...data } : m);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_messages__', JSON.stringify(list));
-        return list.find(m => m.id === id) || { id, ...data };
+        return { id, ...data };
       },
       delete: async (id) => {
         if (supabase) {
           await supabase.from('contact_messages').delete().eq('id', id);
         }
-        let list = [];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('__rehbar_local_messages__');
-          if (local) { try { list = JSON.parse(local); } catch {} }
-        }
-        list = list.filter(m => m.id !== id);
-        if (typeof window !== 'undefined') localStorage.setItem('__rehbar_local_messages__', JSON.stringify(list));
         return { success: true };
       }
-    }
+    },
   },
   integrations: {
     Core: {
