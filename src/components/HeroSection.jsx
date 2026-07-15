@@ -17,29 +17,35 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F0F0F]/60 via-transparent to-[#0F0F0F]" />
       </div>
 
-      {/* Split title */}
-      <div className="absolute inset-0 flex flex-col justify-between px-6 md:px-16 py-20 md:py-24 pointer-events-none">
+      {/* Brand title layer - Arabic at top, English at bottom */}
+      <div className="absolute inset-0 flex flex-col justify-between px-6 md:px-16 pt-24 md:pt-28 pb-16 md:pb-20 pointer-events-none z-10">
+        {/* Top: Arabic Rehbar */}
         <motion.div
-          initial={{ opacity: 0, x: -60 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: -40 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
+          className="w-full flex justify-center md:justify-start"
         >
-          <h1 className="font-heading text-[8vw] md:text-[6vw] font-black tracking-[0.15em] text-[#E6E2D3] leading-none">
-            REH
+          <h1
+            className="text-[15vw] md:text-[9.5vw] font-bold text-[#E6E2D3]/90 leading-none select-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
+            style={{ fontFamily: "var(--font-arabic), 'Amiri', serif", direction: "rtl" }}
+          >
+            رَهْبَر
           </h1>
         </motion.div>
 
-        <div className="flex-1 flex items-center justify-center">
+        {/* Center: Mission / Subtitle */}
+        <div className="flex-1 flex items-center justify-center my-4">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.5, delay: 0.5 }}
-            className="text-center"
+            transition={{ duration: 1.5, delay: 0.3 }}
+            className="text-center bg-[#0F0F0F]/50 backdrop-blur-sm py-5 px-7 rounded-xl border border-white/10 shadow-2xl"
           >
-            <p className="font-mono text-xs md:text-sm tracking-[0.4em] text-[#6B6B6B] uppercase mb-4">
+            <p className="font-mono text-xs md:text-sm tracking-[0.4em] text-[#C4311E] uppercase mb-3 font-semibold">
               Collection — Limited Edition
             </p>
-            <p className="font-body text-lg md:text-xl text-[#E6E2D3]/70 max-w-lg mx-auto leading-relaxed">
+            <p className="font-body text-base md:text-xl text-[#E6E2D3]/90 max-w-lg mx-auto leading-relaxed">
               Apparel for people who lead with purpose.
               <br />
               Every design is a story. Crafted with meaning.
@@ -47,14 +53,15 @@ export default function HeroSection() {
           </motion.div>
         </div>
 
+        {/* Bottom: English REHBAR */}
         <motion.div
-          initial={{ opacity: 0, x: 60 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="self-end"
+          className="w-full flex justify-center md:justify-end items-end"
         >
-          <h1 className="font-heading text-[8vw] md:text-[6vw] font-black tracking-[0.15em] text-[#E6E2D3] leading-none">
-            BAR
+          <h1 className="font-heading text-[13vw] md:text-[9vw] font-black tracking-[0.22em] text-[#E6E2D3] leading-none uppercase select-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] mr-[-0.22em]">
+            REHBAR
           </h1>
         </motion.div>
       </div>
