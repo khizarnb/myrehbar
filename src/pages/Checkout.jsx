@@ -62,9 +62,12 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: Math.round(total * 100),
+          amountInCents: Math.round(total * 100),
+          amount: total,
           currency: "usd",
-          orderId: orderNumber
+          order_number: orderNumber,
+          orderId: orderNumber,
+          customer_email: form.email
         })
       });
       const data = await res.json();

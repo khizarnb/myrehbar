@@ -30,19 +30,24 @@ export default async function handler(req, res) {
       apiVersion: '2023-10-16',
     });
 
-    const { amount, currency = 'usd', customer_email, order_number } = req.body || {};
+    const { amount, amountInCents, currency = 'usd', customer_email, order_number, orderId } = req.body || {};
     
     // Amount in cents (minimum $0.50 USD = 50 cents)
-    const amountInCents = Math.max(50, Math.round((Number(amount) || 0) * 100));
+    let finalCents = 50;
+    if (amountInCents !== undefined && amountInCents !== null && !isNaN(Number(amountInCents))) {
+      finalCents = Math.max(50, Math.round(Number(amountInCents)));
+    } else if (amount !== undefined && amount !== null && !isNaN(Number(amount))) {
+      finalCents = Math.max(50, Math.round(Number(amount) * 100));
+    }
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
+      amount: finalCents,
       currency: currency.toLowerCase(),
       automatic_payment_methods: {
         enabled: true,
       },
       metadata: {
-        order_number: order_number || 'REH-CHECKOUT',
+        order_number: order_number || orderId || 'REH-CHECKOUT',
         customer_email: customer_email || 'anonymous',
       },
     });
