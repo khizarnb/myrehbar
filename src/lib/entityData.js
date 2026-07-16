@@ -60,15 +60,28 @@ export function useProductBySlug(slug) {
   });
 }
 
+function normalizeArticleBlocks(a) {
+  let blocks = [];
+  if (Array.isArray(a.blocks) && a.blocks.length > 0) {
+    blocks = a.blocks;
+  } else if (a.blocks_json) {
+    try {
+      const parsed = typeof a.blocks_json === 'string' ? JSON.parse(a.blocks_json) : a.blocks_json;
+      if (Array.isArray(parsed) && parsed.length > 0) blocks = parsed;
+    } catch {}
+  }
+  if (blocks.length === 0 && typeof a.content === 'string' && a.content.trim()) {
+    blocks = a.content.split(/\n\s*\n/).filter(p => p.trim()).map(p => ({ type: 'paragraph', text: p.trim() }));
+  }
+  return { ...a, blocks };
+}
+
 export function useJournalArticles() {
   return useQuery({
     queryKey: ['journalArticles'],
     queryFn: async () => {
       const items = await db.entities.JournalArticle.list();
-      return items.map(a => ({
-        ...a,
-        blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
-      }));
+      return items.map(normalizeArticleBlocks);
     },
     staleTime: 0,
     refetchOnMount: true,
@@ -81,11 +94,7 @@ export function useJournalArticleBySlug(slug) {
     queryFn: async () => {
       const items = await db.entities.JournalArticle.filter({ slug });
       if (!items.length) return null;
-      const a = items[0];
-      return {
-        ...a,
-        blocks: Array.isArray(a.blocks) ? a.blocks : (a.blocks_json ? JSON.parse(a.blocks_json) : []),
-      };
+      return normalizeArticleBlocks(items[0]);
     },
     enabled: !!slug,
     staleTime: 0,
