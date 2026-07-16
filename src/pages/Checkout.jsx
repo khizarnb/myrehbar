@@ -171,6 +171,23 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
             "Charity Selection": `${orderData.charity} ($${orderData.charity_donation} donation)`,
             "Payment Status": `Paid (${paymentMethodIdOrStatus})`,
             "Order Time": new Date().toLocaleString()
+          },
+          rawOrder: {
+            order_number: orderData.order_number,
+            order_items: orderData.order_items,
+            customer_name: orderData.customer_name,
+            customer_email: orderData.customer_email,
+            customer_phone: orderData.customer_phone,
+            shipping_address: orderData.shipping_address,
+            shipping_city: orderData.shipping_city,
+            shipping_country: orderData.shipping_country,
+            shipping_zip: orderData.shipping_zip,
+            charity: orderData.charity,
+            charity_donation: orderData.charity_donation,
+            subtotal: orderData.subtotal,
+            shipping_cost: orderData.shipping_cost,
+            total: orderData.total,
+            payment_id: paymentMethodIdOrStatus
           }
         });
       }

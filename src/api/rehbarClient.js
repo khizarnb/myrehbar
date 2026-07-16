@@ -707,11 +707,29 @@ export const db = {
           reader.readAsDataURL(file);
         });
       },
-      SendEmail: async ({ to = 'sales@myrehbar.com', subject, body, orderData }) => {
+      SendEmail: async ({ to = 'sales@myrehbar.com', subject, body, orderData, rawOrder }) => {
         const targetEmail = to || 'sales@myrehbar.com';
         console.log(`[Rehbar Email System] Dispatching notification to ${targetEmail}: "${subject}"`);
 
-        // 1. Try Supabase Edge Function if available
+        // 1. Trigger our dedicated Resend Confirmation API Route (non-blocking)
+        try {
+          if (rawOrder || orderData) {
+            await fetch('/api/send-order-confirmation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                rawOrder: rawOrder || {},
+                orderData: orderData || {},
+                subject: subject,
+                adminEmail: targetEmail
+              })
+            });
+          }
+        } catch (resendErr) {
+          console.warn('[Resend Confirmation Route Non-Blocking Error]:', resendErr);
+        }
+
+        // 2. Try Supabase Edge Function if available
         if (supabase) {
           try {
             await supabase.functions.invoke('send-email', {
@@ -722,7 +740,7 @@ export const db = {
           }
         }
 
-        // 2. Dispatch via FormSubmit AJAX API so sales@myrehbar.com receives instant notification
+        // 3. Dispatch via FormSubmit AJAX API so sales@myrehbar.com receives instant notification
         try {
           const payload = {
             _subject: subject || `🚨 New Notification from REHBAR Store`,
