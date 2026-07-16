@@ -29,6 +29,17 @@ import AdminCustomers from '@/pages/admin/AdminCustomers';
 import AdminJournal from '@/pages/admin/AdminJournal';
 import AdminMessages from '@/pages/admin/AdminMessages';
 import AdminSettings from '@/pages/admin/AdminSettings';
+import AdminCategories from '@/pages/admin/AdminCategories';
+import AdminInventory from '@/pages/admin/AdminInventory';
+import AdminPages from '@/pages/admin/AdminPages';
+import AdminMedia from '@/pages/admin/AdminMedia';
+import AdminCoupons from '@/pages/admin/AdminCoupons';
+import AdminAnalytics from '@/pages/admin/AdminAnalytics';
+import AdminReports from '@/pages/admin/AdminReports';
+import AdminShipping from '@/pages/admin/AdminShipping';
+import AdminPayments from '@/pages/admin/AdminPayments';
+import AdminUsers from '@/pages/admin/AdminUsers';
+import AdminRoles from '@/pages/admin/AdminRoles';
 import Login from '@/pages/Login';
 
 const AuthenticatedApp = () => {
@@ -71,9 +82,20 @@ const AuthenticatedApp = () => {
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/categories" element={<AdminCategories />} />
+          <Route path="/admin/inventory" element={<AdminInventory />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/customers" element={<AdminCustomers />} />
           <Route path="/admin/journal" element={<AdminJournal />} />
+          <Route path="/admin/pages" element={<AdminPages />} />
+          <Route path="/admin/media" element={<AdminMedia />} />
+          <Route path="/admin/coupons" element={<AdminCoupons />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/shipping" element={<AdminShipping />} />
+          <Route path="/admin/payments" element={<AdminPayments />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/roles" element={<AdminRoles />} />
           <Route path="/admin/messages" element={<AdminMessages />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>

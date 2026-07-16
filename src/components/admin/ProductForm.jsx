@@ -14,6 +14,9 @@ export default function ProductForm({ product, onClose }) {
     slug: product?.slug || '',
     subtitle: product?.subtitle || '',
     price: product?.price || 50,
+    compare_at_price: product?.compare_at_price || Number(product?.price || 50) + 15,
+    category: product?.category || 'Apparel',
+    sku: product?.sku || 'SKU-' + Math.floor(Math.random()*9000 + 1000),
     edition: product?.edition || '100',
     inventory: product?.inventory ?? 100,
     description: product?.description || '',
@@ -28,6 +31,7 @@ export default function ProductForm({ product, onClose }) {
     blogTitle: product?.blogTitle || '',
     blogContent: product?.blogContent || '',
     active: product?.active ?? true,
+    featured: product?.featured ?? false,
   });
 
   const mutation = useMutation({
@@ -47,6 +51,7 @@ export default function ProductForm({ product, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const images = form.imagesText.split('\n').map(x => x.trim()).filter(Boolean);
     const specs = {
       material: form.material,
       weight: form.weight,
@@ -61,7 +66,9 @@ export default function ProductForm({ product, onClose }) {
       slug: form.slug || form.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       subtitle: form.subtitle,
       price: Number(form.price),
-      compare_at_price: Number(form.price) + 15,
+      compare_at_price: Number(form.compare_at_price || Number(form.price) + 15),
+      category: form.category || 'Apparel',
+      sku: form.sku || 'SKU-001',
       edition: form.edition,
       inventory: Number(form.inventory),
       stock: Number(form.inventory),
@@ -77,6 +84,7 @@ export default function ProductForm({ product, onClose }) {
       blogContent: form.blogContent,
       active: form.active,
       status: form.active ? 'active' : 'draft',
+      featured: form.featured,
     };
     mutation.mutate(payload);
   };
@@ -104,23 +112,37 @@ export default function ProductForm({ product, onClose }) {
             </div>
           </div>
 
-          <div>
-            <label className={labelCls}>Subtitle</label>
-            <input className={inputCls} value={form.subtitle} onChange={set('subtitle')} placeholder="THE VANGUARD" />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>Price ($ USD)</label>
-              <input type="number" className={inputCls} value={form.price} onChange={set('price')} required />
+              <label className={labelCls}>Subtitle / Tagline</label>
+              <input className={inputCls} value={form.subtitle} onChange={set('subtitle')} placeholder="THE VANGUARD" />
             </div>
             <div>
-              <label className={labelCls}>Edition</label>
-              <input className={inputCls} value={form.edition} onChange={set('edition')} />
+              <label className={labelCls}>Category</label>
+              <select className={inputCls} value={form.category} onChange={set('category')}>
+                <option value="Apparel" className="bg-[#0F0F0F]">Apparel</option>
+                <option value="Accessories" className="bg-[#0F0F0F]">Accessories</option>
+                <option value="Limited Edition" className="bg-[#0F0F0F]">Limited Edition</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-4">
+            <div>
+              <label className={labelCls}>Price ($)</label>
+              <input type="number" step="0.01" className={inputCls} value={form.price} onChange={set('price')} required />
+            </div>
+            <div>
+              <label className={labelCls}>Compare ($)</label>
+              <input type="number" step="0.01" className={inputCls} value={form.compare_at_price} onChange={set('compare_at_price')} />
             </div>
             <div>
               <label className={labelCls}>Inventory</label>
               <input type="number" className={inputCls} value={form.inventory} onChange={set('inventory')} required />
+            </div>
+            <div>
+              <label className={labelCls}>SKU Code</label>
+              <input className={inputCls} value={form.sku} onChange={set('sku')} />
             </div>
           </div>
 
@@ -181,10 +203,16 @@ export default function ProductForm({ product, onClose }) {
             </div>
           </div>
 
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.active} onChange={set('active')} className="w-4 h-4 accent-[#C4311E]" />
-            <span className="font-mono text-xs tracking-[0.2em] text-[#E6E2D3] uppercase">Active (visible on site)</span>
-          </label>
+          <div className="flex flex-wrap items-center gap-6 pt-2">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={form.active} onChange={set('active')} className="w-4 h-4 accent-[#C4311E]" />
+              <span className="font-mono text-xs tracking-[0.2em] text-[#E6E2D3] uppercase">Active (visible on site)</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={form.featured} onChange={set('featured')} className="w-4 h-4 accent-amber-500" />
+              <span className="font-mono text-xs tracking-[0.2em] text-amber-400 uppercase">Featured Product</span>
+            </label>
+          </div>
 
           {mutation.isError && <p className="text-[#C4311E] text-sm font-mono">Error: {mutation.error?.message}</p>}
 

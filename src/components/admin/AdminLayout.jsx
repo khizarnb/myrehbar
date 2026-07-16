@@ -5,7 +5,8 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { useQueryClient } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Package, ShoppingCart, Users, FileText, ExternalLink, 
-  Lock, LogOut, MessageSquare, Shield, Bell, Search, ChevronDown, CheckCircle, AlertTriangle, RefreshCw 
+  Lock, LogOut, MessageSquare, Shield, Bell, Search, ChevronDown, CheckCircle, AlertTriangle, RefreshCw,
+  Tags, Archive, File, Image, Percent, BarChart3, FileSpreadsheet, Truck, CreditCard, UserCheck, Settings
 } from "lucide-react";
 import { useOrders, useProducts, clearStoreCachesAndSync } from "@/lib/entityData";
 
@@ -13,10 +14,20 @@ const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/categories", label: "Categories", icon: Tags },
+  { to: "/admin/inventory", label: "Inventory", icon: Archive },
   { to: "/admin/customers", label: "Customers", icon: Users },
-  { to: "/admin/journal", label: "Journal", icon: FileText },
-  { to: "/admin/messages", label: "Messages", icon: MessageSquare },
-  { to: "/admin/settings", label: "Permissions", icon: Shield },
+  { to: "/admin/journal", label: "Blogs", icon: FileText },
+  { to: "/admin/pages", label: "Pages", icon: File },
+  { to: "/admin/media", label: "Media Library", icon: Image },
+  { to: "/admin/coupons", label: "Coupons", icon: Percent },
+  { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/admin/reports", label: "Reports", icon: FileSpreadsheet },
+  { to: "/admin/shipping", label: "Shipping", icon: Truck },
+  { to: "/admin/payments", label: "Payments", icon: CreditCard },
+  { to: "/admin/users", label: "Users", icon: UserCheck },
+  { to: "/admin/roles", label: "Roles", icon: Shield },
+  { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function AdminLayout() {

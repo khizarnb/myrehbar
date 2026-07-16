@@ -4,16 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 
 // Global helper function to invalidate query caches and trigger real-time re-fetch from database
 export async function clearStoreCachesAndSync(queryClient, purgeLocal = false) {
-  if (typeof window !== 'undefined' && purgeLocal === true) {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('__b44_live_products');
+    localStorage.removeItem('__b44_live_journal');
     localStorage.removeItem('__rehbar_local_products__');
     localStorage.removeItem('__rehbar_local_journals__');
-    sessionStorage.clear();
   }
   if (queryClient && queryClient.invalidateQueries) {
-    await queryClient.invalidateQueries({ queryKey: ['products'] });
-    await queryClient.invalidateQueries({ queryKey: ['journalArticles'] });
-    await queryClient.invalidateQueries({ queryKey: ['orders'] });
-    await queryClient.invalidateQueries({ queryKey: ['customers'] });
+    await queryClient.invalidateQueries();
   }
   return true;
 }
