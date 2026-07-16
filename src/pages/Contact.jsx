@@ -51,20 +51,6 @@ export default function Contact() {
           read: false
         });
 
-        if (db.integrations?.Core?.SendEmail) {
-          db.integrations.Core.SendEmail({
-            to: "sales@myrehbar.com",
-            subject: `💬 New Customer Inquiry from ${form.name}`,
-            body: `New message received via REHBAR Store Contact Form:\n\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone || 'N/A'}\n\nMessage:\n${form.message}`,
-            orderData: {
-              "Customer Name": form.name,
-              "Customer Email": form.email,
-              "Phone Number": form.phone || 'N/A',
-              "Message Content": form.message
-            }
-          }).catch(() => {});
-        }
-
         setSubmitted(true);
         setForm({ name: "", email: "", phone: "", message: "" });
         refreshCaptcha();

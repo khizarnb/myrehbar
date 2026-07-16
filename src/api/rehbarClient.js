@@ -711,9 +711,10 @@ export const db = {
         const targetEmail = to || 'sales@myrehbar.com';
         console.log(`[Rehbar Email System] Dispatching notification to ${targetEmail}: "${subject}"`);
 
-        // 1. Trigger our dedicated Resend Confirmation API Route (non-blocking)
+        // 1. Trigger our dedicated Resend Confirmation API Route ONLY for store orders (non-blocking)
         try {
-          if (rawOrder || orderData) {
+          const isOrder = rawOrder || (orderData && (orderData["Order Number"] || orderData.order_number || orderData.order_items));
+          if (isOrder) {
             await fetch('/api/send-order-confirmation', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
