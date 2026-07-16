@@ -2,17 +2,49 @@ import { createClient } from '@supabase/supabase-js';
 import { products as initialSeedProducts } from '@/lib/products';
 import { journalArticles as fallbackJournal } from '@/lib/journal';
 
-const rawUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ztaisbdcndxtgjfjswkg.supabase.co';
-const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_w9LzlsQRfrKglfvxIPVtYQ_Ng-bfAV0';
+let rawUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ztaisbdcndxtgjfjswkg.supabase.co';
+let rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_w9LzlsQRfrKglfvxIPVtYQ_Ng-bfAV0';
 
-const supabaseUrl = typeof rawUrl === 'string' ? rawUrl.trim().replace(/\/+$/, '') : 'https://ztaisbdcndxtgjfjswkg.supabase.co';
-const supabaseKey = typeof rawKey === 'string' ? rawKey.trim() : 'sb_publishable_w9LzlsQRfrKglfvxIPVtYQ_Ng-bfAV0';
+if (typeof rawUrl === 'string') {
+  rawUrl = rawUrl.replace(/["']/g, '').trim().replace(/\/+$/, '');
+}
+if (typeof rawKey === 'string') {
+  rawKey = rawKey.replace(/["']/g, '').trim();
+}
+
+const supabaseUrl = (!rawUrl || !rawUrl.startsWith('https://') || !rawUrl.includes('.supabase.co'))
+  ? 'https://ztaisbdcndxtgjfjswkg.supabase.co'
+  : rawUrl;
+
+const supabaseKey = (!rawKey || rawKey.length < 20)
+  ? 'sb_publishable_w9LzlsQRfrKglfvxIPVtYQ_Ng-bfAV0'
+  : rawKey;
+
+const customFetch = async (url, options = {}) => {
+  try {
+    let cleanUrl = typeof url === 'string' ? url.replace(/["']/g, '').replace(/([^:]\/)\/+/g, '$1') : url;
+    return await fetch(cleanUrl, options);
+  } catch (err) {
+    console.error(`[Supabase Fetch Error] Request to ${url} failed:`, err);
+    try {
+      await new Promise(r => setTimeout(r, 400));
+      let cleanUrl = typeof url === 'string' ? url.replace(/["']/g, '').replace(/([^:]\/)\/+/g, '$1') : url;
+      return await fetch(cleanUrl, options);
+    } catch (retryErr) {
+      console.error(`[Supabase Fetch Retry Failed] Request to ${url} failed again:`, retryErr);
+      throw retryErr;
+    }
+  }
+};
 
 export const supabase = (supabaseUrl && supabaseKey)
   ? createClient(supabaseUrl, supabaseKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true
+      },
+      global: {
+        fetch: customFetch
       }
     })
   : null;
