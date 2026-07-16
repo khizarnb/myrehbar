@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
   if (!secretKey) {
     return res.status(500).json({ 
-      error: 'Stripe secret key not configured on server. Please ensure STRIPE_SECRET_KEY is added to Vercel Environment Variables.' 
+      error: 'Stripe Secret Key (STRIPE_SECRET_KEY) is not configured on the Vercel backend. To collect real card payments and deposit funds into your account, open Vercel -> Project Settings -> Environment Variables and add STRIPE_SECRET_KEY containing your Stripe Secret Key (sk_live_... or sk_test_...).' 
     });
   }
 

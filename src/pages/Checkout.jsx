@@ -55,6 +55,7 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
 
     // Attempt backend PaymentIntent first
     let clientSecret = null;
+    let backendErrorMsg = "";
     const orderNumber = "REH-" + Date.now().toString().slice(-6);
     try {
       const res = await fetch('/api/create-payment-intent', {
@@ -67,41 +68,25 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
           order_number: orderNumber
         })
       });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await res.json();
+      if (res.ok && data.clientSecret) {
         clientSecret = data.clientSecret;
+      } else {
+        backendErrorMsg = data.error || "Could not initialize Stripe payment on server.";
       }
     } catch (e) {
-      // Backend not reached or not configured
+      backendErrorMsg = e.message || "Failed to connect to backend payment server.";
+    }
+
+    if (!clientSecret) {
+      setError(`Payment processing failed: ${backendErrorMsg} (Store owner note: You have added your Stripe Publishable Key, but real charges require STRIPE_SECRET_KEY [sk_live_...] to be added inside Vercel Environment Variables).`);
+      setSubmitting(false);
+      return;
     }
 
     let paymentMethodIdOrStatus = "";
-    if (clientSecret) {
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardEl,
-          billing_details: {
-            name: form.cardName || form.name || "Customer",
-            email: form.email,
-            phone: form.phone || undefined,
-            address: {
-              line1: form.address,
-              city: form.city,
-              country: getCleanCountryCode(form.country) === "ROW" ? "GB" : getCleanCountryCode(form.country),
-              postal_code: form.zip
-            }
-          }
-        }
-      });
-      if (result.error) {
-        setError(result.error.message || "Payment verification failed.");
-        setSubmitting(false);
-        return;
-      }
-      paymentMethodIdOrStatus = result.paymentIntent?.id || "Stripe_Paid";
-    } else {
-      const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
+    const result = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
         card: cardEl,
         billing_details: {
           name: form.cardName || form.name || "Customer",
@@ -114,14 +99,16 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
             postal_code: form.zip
           }
         }
-      });
-      if (pmError) {
-        setError(pmError.message || "Invalid card details.");
-        setSubmitting(false);
-        return;
       }
-      paymentMethodIdOrStatus = paymentMethod.id;
+    });
+
+    if (result.error) {
+      setError(result.error.message || "Payment verification failed or card declined.");
+      setSubmitting(false);
+      return;
     }
+
+    paymentMethodIdOrStatus = result.paymentIntent?.id || "Stripe_Paid";
 
     // Save order and complete
     const chosenCharity = form.charity === "Charity of your choice" ? `Custom: ${form.customCharity}` : form.charity;
