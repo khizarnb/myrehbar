@@ -32,6 +32,74 @@ const cardElementOptions = {
   },
 };
 
+async function dispatchOrderNotificationEmails(orderData, paymentStatus) {
+  const itemsFormatted = (orderData.order_items || []).map(i => `${i.quantity}x ${i.product_title} (${i.size || 'Regular'}) - $${i.price * i.quantity}`).join(' | ');
+  const emailSubject = `🚨 NEW REHBAR ORDER #${orderData.order_number} ($${orderData.total} USD - ${orderData.shipping_country})`;
+  const emailBody = `A new order has been placed on REHBAR Store!\n\nOrder #${orderData.order_number}\nTotal Amount: $${orderData.total} USD\nCustomer: ${orderData.customer_name} (${orderData.customer_email})\nPhone: ${orderData.customer_phone || 'N/A'}\n\nShipping Destination:\n${orderData.shipping_address}, ${orderData.shipping_city}, ${orderData.shipping_zip}, ${orderData.shipping_country}\n\nItems:\n${itemsFormatted}\n\nCharity Selected: ${orderData.charity} (Donation: $${orderData.charity_donation})\nPayment Status: ${paymentStatus}`;
+
+  const rawOrderPayload = {
+    order_number: orderData.order_number,
+    order_items: orderData.order_items,
+    customer_name: orderData.customer_name,
+    customer_email: orderData.customer_email,
+    customer_phone: orderData.customer_phone,
+    shipping_address: orderData.shipping_address,
+    shipping_city: orderData.shipping_city,
+    shipping_country: orderData.shipping_country,
+    shipping_zip: orderData.shipping_zip,
+    charity: orderData.charity,
+    charity_donation: orderData.charity_donation,
+    subtotal: orderData.subtotal,
+    shipping_cost: orderData.shipping_cost,
+    total: orderData.total,
+    payment_id: paymentStatus
+  };
+
+  const orderDataPayload = {
+    "Order Number": `#${orderData.order_number}`,
+    "Total Paid": `$${orderData.total} USD`,
+    "Customer Name": orderData.customer_name,
+    "Customer Email": orderData.customer_email,
+    "Customer Phone": orderData.customer_phone || 'N/A',
+    "Shipping Address": `${orderData.shipping_address}, ${orderData.shipping_city}, ${orderData.shipping_zip}, ${orderData.shipping_country}`,
+    "Items Ordered": itemsFormatted,
+    "Charity Selection": `${orderData.charity} ($${orderData.charity_donation} donation)`,
+    "Payment Status": paymentStatus,
+    "Order Time": new Date().toLocaleString()
+  };
+
+  // 1. Directly call Resend endpoint immediately
+  try {
+    await fetch('/api/send-order-confirmation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rawOrder: rawOrderPayload,
+        orderData: orderDataPayload,
+        subject: emailSubject,
+        adminEmail: 'sales@myrehbar.com'
+      })
+    });
+  } catch (err) {
+    console.error('Direct order confirmation endpoint error:', err);
+  }
+
+  // 2. Also call client SDK SendEmail
+  try {
+    if (db.integrations?.Core?.SendEmail) {
+      await db.integrations.Core.SendEmail({
+        to: 'sales@myrehbar.com',
+        subject: emailSubject,
+        body: emailBody,
+        orderData: orderDataPayload,
+        rawOrder: rawOrderPayload
+      });
+    }
+  } catch (err) {
+    console.error('SDK SendEmail error:', err);
+  }
+}
+
 function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDonation, clearCart, navigate, setStep, appliedCoupon, discountAmount }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -161,47 +229,7 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
         status: "paid (stripe: " + paymentMethodIdOrStatus + ")"
       });
 
-      // Dispatch order notification email to sales@myrehbar.com
-      const itemsFormatted = orderData.order_items.map(i => `${i.quantity}x ${i.product_title} (${i.size || 'Regular'}) - $${i.price * i.quantity}`).join(' | ');
-      const emailSubject = `🚨 NEW REHBAR ORDER #${orderData.order_number} ($${orderData.total} USD - ${orderData.shipping_country})`;
-      const emailBody = `A new order has been placed on REHBAR Store!\n\nOrder #${orderData.order_number}\nTotal Amount: $${orderData.total} USD\nCustomer: ${orderData.customer_name} (${orderData.customer_email})\nPhone: ${orderData.customer_phone || 'N/A'}\n\nShipping Destination:\n${orderData.shipping_address}, ${orderData.shipping_city}, ${orderData.shipping_zip}, ${orderData.shipping_country}\n\nItems:\n${itemsFormatted}\n\nCharity Selected: ${orderData.charity} (Donation: $${orderData.charity_donation})\nPayment Status: Paid (${paymentMethodIdOrStatus})`;
-
-      if (db.integrations?.Core?.SendEmail) {
-        await db.integrations.Core.SendEmail({
-          to: 'sales@myrehbar.com',
-          subject: emailSubject,
-          body: emailBody,
-          orderData: {
-            "Order Number": `#${orderData.order_number}`,
-            "Total Paid": `$${orderData.total} USD`,
-            "Customer Name": orderData.customer_name,
-            "Customer Email": orderData.customer_email,
-            "Customer Phone": orderData.customer_phone || 'N/A',
-            "Shipping Address": `${orderData.shipping_address}, ${orderData.shipping_city}, ${orderData.shipping_zip}, ${orderData.shipping_country}`,
-            "Items Ordered": itemsFormatted,
-            "Charity Selection": `${orderData.charity} ($${orderData.charity_donation} donation)`,
-            "Payment Status": `Paid (${paymentMethodIdOrStatus})`,
-            "Order Time": new Date().toLocaleString()
-          },
-          rawOrder: {
-            order_number: orderData.order_number,
-            order_items: orderData.order_items,
-            customer_name: orderData.customer_name,
-            customer_email: orderData.customer_email,
-            customer_phone: orderData.customer_phone,
-            shipping_address: orderData.shipping_address,
-            shipping_city: orderData.shipping_city,
-            shipping_country: orderData.shipping_country,
-            shipping_zip: orderData.shipping_zip,
-            charity: orderData.charity,
-            charity_donation: orderData.charity_donation,
-            subtotal: orderData.subtotal,
-            shipping_cost: orderData.shipping_cost,
-            total: orderData.total,
-            payment_id: paymentMethodIdOrStatus
-          }
-        });
-      }
+      await dispatchOrderNotificationEmails(orderData, "Paid (" + paymentMethodIdOrStatus + ")");
     } catch (e) {
       console.error('Order creation or email notification error:', e);
     }
@@ -402,6 +430,7 @@ export default function Checkout() {
         total: orderData.total,
         status: "pending"
       });
+      await dispatchOrderNotificationEmails(orderData, "Pending (Fallback/Stripe bypass)");
     } catch (e) { /* order save failed, continue to confirmation */ }
     clearCart();
     navigate(`/order-confirmation/${orderNumber}`, { state: { order: orderData } });

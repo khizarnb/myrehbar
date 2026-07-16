@@ -86,7 +86,7 @@ export default async function handler(req, res) {
     const sendResendEmail = async (toEmail, subject, htmlContent) => {
       if (!toEmail) return null;
       try {
-        const response = await fetch('https://api.resend.com/emails', {
+        let response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${resendApiKey}`,
@@ -99,11 +99,33 @@ export default async function handler(req, res) {
             html: htmlContent
           })
         });
-        const result = await response.json();
+        let result = await response.json();
         if (!response.ok) {
-          console.error(`[Resend Error] Failed to send email to ${toEmail}:`, result);
-        } else {
+          console.error(`[Resend Error with orders@myrehbar.com] to ${toEmail}:`, result);
+          // Try fallback to onboarding@resend.dev if custom domain verification is pending in Resend
+          try {
+            response = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${resendApiKey}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                from: 'Rehbar Store <onboarding@resend.dev>',
+                to: [toEmail],
+                subject: subject,
+                html: htmlContent
+              })
+            });
+            result = await response.json();
+          } catch (fbErr) {
+            console.error('[Resend Fallback Error]:', fbErr);
+          }
+        }
+        if (response.ok) {
           console.log(`[Resend Success] Email sent to ${toEmail}:`, result.id);
+        } else {
+          console.error(`[Resend Final Error] Failed to send email to ${toEmail}:`, result);
         }
         return result;
       } catch (err) {
