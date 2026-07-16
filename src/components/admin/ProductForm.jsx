@@ -55,21 +55,28 @@ export default function ProductForm({ product, onClose }) {
       limited: form.limited,
       charity: form.charity,
     };
-    const images = form.imagesText.split('\n').map(s => s.trim()).filter(Boolean);
     const payload = {
       title: form.title,
-      slug: form.slug || form.title.toLowerCase().replace(/\s+/g, '-'),
+      name: form.title,
+      slug: form.slug || form.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       subtitle: form.subtitle,
       price: Number(form.price),
+      compare_at_price: Number(form.price) + 15,
       edition: form.edition,
       inventory: Number(form.inventory),
+      stock: Number(form.inventory),
       description: form.description,
-      heroImage: form.heroImage,
+      heroImage: form.heroImage || (images[0] || ''),
+      image: form.heroImage || (images[0] || ''),
+      specs: specs,
       specs_json: JSON.stringify(specs),
+      images: images,
+      gallery: images,
       images_json: JSON.stringify(images),
       blogTitle: form.blogTitle,
       blogContent: form.blogContent,
       active: form.active,
+      status: form.active ? 'active' : 'draft',
     };
     mutation.mutate(payload);
   };

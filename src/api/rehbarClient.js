@@ -147,23 +147,29 @@ export const db = {
   entities: {
     Product: {
       list: async () => {
-        // Product details are static (updated via code/prompts as requested)
-        return initialSeedProducts.map(p => ({
-          ...p,
-          title: p.title || p.name || 'Untitled Product',
-          name: p.name || p.title || 'Untitled Product',
-          inventory: p.inventory !== undefined && p.inventory !== null ? p.inventory : (p.stock !== undefined && p.stock !== null ? p.stock : 100),
-          stock: p.stock !== undefined && p.stock !== null ? p.stock : (p.inventory !== undefined && p.inventory !== null ? p.inventory : 100),
-          price: Number(p.price || 0),
-          compare_at_price: Number(p.compare_at_price || 0),
-          heroImage: p.heroImage || p.image || (Array.isArray(p.images) ? p.images[0] : ''),
-          image: p.image || p.heroImage || (Array.isArray(p.images) ? p.images[0] : ''),
-          gallery: Array.isArray(p.gallery) && p.gallery.length ? p.gallery : (Array.isArray(p.images) ? p.images : []),
-          images: Array.isArray(p.images) && p.images.length ? p.images : (Array.isArray(p.gallery) ? p.gallery : []),
-          category: p.category || 'Apparel',
-          status: p.status || (p.active ? 'active' : 'draft'),
-          active: p.active !== undefined ? p.active : (p.status !== 'draft')
-        }));
+        if (supabase) {
+          const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: true });
+          if (!error && data && data.length > 0) {
+            return data.map(p => ({
+              ...p,
+              title: p.title || p.name || 'Untitled Product',
+              name: p.name || p.title || 'Untitled Product',
+              inventory: p.inventory !== undefined && p.inventory !== null ? p.inventory : (p.stock !== undefined && p.stock !== null ? p.stock : 100),
+              stock: p.stock !== undefined && p.stock !== null ? p.stock : (p.inventory !== undefined && p.inventory !== null ? p.inventory : 100),
+              price: Number(p.price || 0),
+              compare_at_price: Number(p.compare_at_price || 0),
+              heroImage: p.heroImage || p.image || (Array.isArray(p.images) ? p.images[0] : ''),
+              image: p.image || p.heroImage || (Array.isArray(p.images) ? p.images[0] : ''),
+              gallery: Array.isArray(p.gallery) && p.gallery.length ? p.gallery : (Array.isArray(p.images) ? p.images : []),
+              images: Array.isArray(p.images) && p.images.length ? p.images : (Array.isArray(p.gallery) ? p.gallery : []),
+              category: p.category || 'Apparel',
+              status: p.status || (p.active ? 'active' : 'draft'),
+              active: p.active !== undefined ? p.active : (p.status !== 'draft')
+            }));
+          }
+          if (error) console.error('[Supabase Product List Error]', error);
+        }
+        return initialSeedProducts;
       },
       filter: async (query) => {
         let list = await db.entities.Product.list();
@@ -177,24 +183,68 @@ export const db = {
         return list.find(p => String(p.id) === String(id) || String(p.slug) === String(id)) || null;
       },
       create: async (data) => {
-        const payload = { id: 'prod_' + Date.now(), ...data };
-        initialSeedProducts.unshift(payload);
-        return payload;
+        const payload = {
+          id: 'prod_' + Date.now(),
+          ...data,
+          title: data.title || data.name || 'New Product',
+          name: data.name || data.title || 'New Product',
+          slug: data.slug || (data.title || 'product').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000)
+        };
+        if (payload.specs_json) {
+          try { payload.specs = JSON.parse(payload.specs_json); } catch {}
+          delete payload.specs_json;
+        }
+        if (payload.images_json) {
+          try { payload.images = JSON.parse(payload.images_json); if (!payload.gallery) payload.gallery = payload.images; } catch {}
+          delete payload.images_json;
+        }
+        if (payload.inventory !== undefined) payload.stock = payload.inventory;
+        else if (payload.stock !== undefined) payload.inventory = payload.stock;
+
+        if (supabase) {
+          const { data: created, error } = await supabase.from('products').insert([payload]).select().single();
+          if (!error && created) return created;
+          if (error) throw new Error(`Product create failed in Supabase: ${error.message}`);
+        }
+        throw new Error('Supabase database not connected.');
       },
       update: async (id, data) => {
-        const idx = initialSeedProducts.findIndex(p => String(p.id) === String(id) || String(p.slug) === String(id));
-        if (idx !== -1) {
-          initialSeedProducts[idx] = { ...initialSeedProducts[idx], ...data };
-          return initialSeedProducts[idx];
+        const payload = { ...data };
+        if (payload.specs_json) {
+          try { payload.specs = JSON.parse(payload.specs_json); } catch {}
+          delete payload.specs_json;
         }
-        return { id, ...data };
+        if (payload.images_json) {
+          try { payload.images = JSON.parse(payload.images_json); if (!payload.gallery) payload.gallery = payload.images; } catch {}
+          delete payload.images_json;
+        }
+        if (payload.inventory !== undefined) payload.stock = payload.inventory;
+        else if (payload.stock !== undefined) payload.inventory = payload.stock;
+
+        if (supabase) {
+          let { data: updated, error } = await supabase.from('products').update(payload).eq('id', id).select().single();
+          if (error || !updated) {
+            const res2 = await supabase.from('products').update(payload).eq('slug', id).select().single();
+            updated = res2.data;
+            error = res2.error;
+          }
+          if (!error && updated) return updated;
+          throw new Error(`Product update failed in Supabase: ${error?.message || 'Product ID/Slug not found'}`);
+        }
+        throw new Error('Supabase database not connected.');
       },
       delete: async (id) => {
-        const idx = initialSeedProducts.findIndex(p => String(p.id) === String(id) || String(p.slug) === String(id));
-        if (idx !== -1) {
-          initialSeedProducts.splice(idx, 1);
+        if (supabase) {
+          const res1 = await supabase.from('products').delete().eq('id', id);
+          if (res1.error) {
+            const res2 = await supabase.from('products').delete().eq('slug', id);
+            if (res2.error) throw new Error(`Product delete failed in Supabase: ${res2.error.message}`);
+          } else {
+            await supabase.from('products').delete().eq('slug', id);
+          }
+          return { success: true };
         }
-        return { success: true };
+        throw new Error('Supabase database not connected.');
       }
     },
     Order: {
@@ -249,9 +299,16 @@ export const db = {
     },
     Customer: {
       list: async () => {
-        const orders = await db.entities.Order.list();
         const customersMap = new Map();
-        
+        if (supabase) {
+          const { data: dbCustomers } = await supabase.from('customers').select('*');
+          if (dbCustomers && Array.isArray(dbCustomers)) {
+            dbCustomers.forEach(c => {
+              if (c.email) customersMap.set(c.email.toLowerCase().trim(), c);
+            });
+          }
+        }
+        const orders = await db.entities.Order.list();
         orders.forEach(o => {
           const email = (o.customer_email || 'unknown@example.com').toLowerCase().trim();
           if (!customersMap.has(email)) {
@@ -271,15 +328,14 @@ export const db = {
             });
           } else {
             const cust = customersMap.get(email);
-            cust.total_orders += 1;
-            cust.total_spent += Number(o.total || 0);
-            if (new Date(o.created_date || o.created_at) > new Date(cust.last_order_date)) {
+            cust.total_orders = (cust.total_orders || 0) + 1;
+            cust.total_spent = Number(cust.total_spent || 0) + Number(o.total || 0);
+            if (!cust.last_order_date || new Date(o.created_date || o.created_at) > new Date(cust.last_order_date)) {
               cust.last_order_date = o.created_date || o.created_at;
             }
           }
         });
 
-        // Add Super Admin and Master staff to customer/user directory
         customersMap.set('admin@myrehbar.com', {
           id: 'cust_super_admin',
           name: 'Master Admin (Super Admin)',
@@ -295,14 +351,40 @@ export const db = {
           role: 'super_admin'
         });
 
-        return Array.from(customersMap.values()).sort((a, b) => b.total_spent - a.total_spent);
+        return Array.from(customersMap.values()).sort((a, b) => (b.total_spent || 0) - (a.total_spent || 0));
+      },
+      create: async (data) => {
+        if (supabase) {
+          const { data: created, error } = await supabase.from('customers').insert([data]).select().single();
+          if (!error && created) return created;
+        }
+        return { id: 'cust_' + Date.now(), ...data };
+      },
+      update: async (id, data) => {
+        if (supabase) {
+          let { data: updated, error } = await supabase.from('customers').update(data).eq('id', id).select().single();
+          if (error || !updated) {
+            const res2 = await supabase.from('customers').update(data).eq('email', id).select().single();
+            updated = res2.data;
+          }
+          if (updated) return updated;
+        }
+        return { id, ...data };
+      },
+      delete: async (id) => {
+        if (supabase) {
+          await supabase.from('customers').delete().eq('id', id);
+          await supabase.from('customers').delete().eq('email', id);
+        }
+        return { success: true };
       }
     },
     JournalArticle: {
       list: async () => {
         if (supabase) {
           const { data, error } = await supabase.from('journal_articles').select('*').order('created_at', { ascending: false });
-          if (!error && data) return data;
+          if (!error && data && data.length > 0) return data;
+          if (error) console.error('[Supabase Journal List Error]', error);
         }
         return fallbackJournal;
       },
@@ -315,6 +397,8 @@ export const db = {
       },
       create: async (data) => {
         const payload = { ...data };
+        if (!payload.id) payload.id = 'art_' + Date.now();
+        if (!payload.slug) payload.slug = (payload.title || 'article').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random()*1000);
         if (payload.blocks_json) {
           try { payload.blocks = JSON.parse(payload.blocks_json); } catch {}
           delete payload.blocks_json;
@@ -333,15 +417,25 @@ export const db = {
           delete payload.blocks_json;
         }
         if (supabase) {
-          const { data: updated, error } = await supabase.from('journal_articles').update(payload).eq('id', id).select().single();
+          let { data: updated, error } = await supabase.from('journal_articles').update(payload).eq('id', id).select().single();
+          if (error || !updated) {
+            const res2 = await supabase.from('journal_articles').update(payload).eq('slug', id).select().single();
+            updated = res2.data;
+            error = res2.error;
+          }
           if (!error && updated) return updated;
-          if (error) throw new Error(`Journal database update failed: ${error.message}`);
+          throw new Error(`Journal database update failed: ${error?.message || 'Article ID/Slug not found'}`);
         }
         throw new Error('Supabase database not connected.');
       },
       delete: async (id) => {
         if (supabase) {
-          await supabase.from('journal_articles').delete().eq('id', id);
+          const res1 = await supabase.from('journal_articles').delete().eq('id', id);
+          if (res1.error) {
+            await supabase.from('journal_articles').delete().eq('slug', id);
+          } else {
+            await supabase.from('journal_articles').delete().eq('slug', id);
+          }
           return { success: true };
         }
         throw new Error('Supabase database not connected.');
@@ -374,6 +468,34 @@ export const db = {
           await supabase.from('contact_messages').delete().eq('id', id);
         }
         return { success: true };
+      }
+    },
+    SiteSetting: {
+      list: async () => {
+        if (supabase) {
+          const { data, error } = await supabase.from('site_settings').select('*');
+          if (!error && data) return data;
+        }
+        return [];
+      },
+      get: async (key) => {
+        if (supabase) {
+          const { data, error } = await supabase.from('site_settings').select('*').eq('key', key).single();
+          if (!error && data) return data;
+        }
+        return null;
+      },
+      update: async (key, value) => {
+        if (supabase) {
+          const { data, error } = await supabase
+            .from('site_settings')
+            .upsert([{ key, value, updated_at: new Date().toISOString() }], { onConflict: 'key' })
+            .select()
+            .single();
+          if (!error && data) return data;
+          if (error) throw new Error(`Settings update failed in Supabase: ${error.message}`);
+        }
+        throw new Error('Supabase database not connected.');
       }
     },
   },
