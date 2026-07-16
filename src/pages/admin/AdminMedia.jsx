@@ -1,6 +1,6 @@
 import { db } from '@/api/rehbarClient';
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clearStoreCachesAndSync } from "@/lib/entityData";
 import { Image, Upload, Copy, Check, Trash2, ExternalLink } from "lucide-react";
@@ -49,6 +49,7 @@ export default function AdminMedia() {
       alert(`Upload error: ${err.message}`);
     } finally {
       setUploading(false);
+      if (e.target) e.target.value = "";
     }
   };
 
