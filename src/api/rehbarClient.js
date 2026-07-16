@@ -2,11 +2,19 @@ import { createClient } from '@supabase/supabase-js';
 import { products as initialSeedProducts } from '@/lib/products';
 import { journalArticles as fallbackJournal } from '@/lib/journal';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ztaisbdcndxtgjfjswkg.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_w9LzlsQRfrKglfvxIPVtYQ_Ng-bfAV0';
+const rawUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ztaisbdcndxtgjfjswkg.supabase.co';
+const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_w9LzlsQRfrKglfvxIPVtYQ_Ng-bfAV0';
+
+const supabaseUrl = typeof rawUrl === 'string' ? rawUrl.trim().replace(/\/+$/, '') : 'https://ztaisbdcndxtgjfjswkg.supabase.co';
+const supabaseKey = typeof rawKey === 'string' ? rawKey.trim() : 'sb_publishable_w9LzlsQRfrKglfvxIPVtYQ_Ng-bfAV0';
 
 export const supabase = (supabaseUrl && supabaseKey)
-  ? createClient(supabaseUrl, supabaseKey)
+  ? createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true
+      }
+    })
   : null;
 
 let currentAuthSession = null;
