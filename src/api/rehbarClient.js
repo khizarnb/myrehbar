@@ -7,6 +7,10 @@ let rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_w9LzlsQRf
 
 if (typeof rawUrl === 'string') {
   rawUrl = rawUrl.replace(/["']/g, '').trim().replace(/\/+$/, '');
+  // Auto-correct any typo in the project ref (e.g., iswkq instead of jswkg from Vercel env vars)
+  if (rawUrl.includes('ztaisbdcndxtgjf')) {
+    rawUrl = 'https://ztaisbdcndxtgjfjswkg.supabase.co';
+  }
 }
 if (typeof rawKey === 'string') {
   rawKey = rawKey.replace(/["']/g, '').trim();
@@ -23,12 +27,18 @@ const supabaseKey = (!rawKey || rawKey.length < 20)
 const customFetch = async (url, options = {}) => {
   try {
     let cleanUrl = typeof url === 'string' ? url.replace(/["']/g, '').replace(/([^:]\/)\/+/g, '$1') : url;
+    if (typeof cleanUrl === 'string' && cleanUrl.includes('ztaisbdcndxtgjf')) {
+      cleanUrl = cleanUrl.replace(/ztaisbdcndxtgjf[^.]+\.supabase\.co/, 'ztaisbdcndxtgjfjswkg.supabase.co');
+    }
     return await fetch(cleanUrl, options);
   } catch (err) {
     console.error(`[Supabase Fetch Error] Request to ${url} failed:`, err);
     try {
       await new Promise(r => setTimeout(r, 400));
       let cleanUrl = typeof url === 'string' ? url.replace(/["']/g, '').replace(/([^:]\/)\/+/g, '$1') : url;
+      if (typeof cleanUrl === 'string' && cleanUrl.includes('ztaisbdcndxtgjf')) {
+        cleanUrl = cleanUrl.replace(/ztaisbdcndxtgjf[^.]+\.supabase\.co/, 'ztaisbdcndxtgjfjswkg.supabase.co');
+      }
       return await fetch(cleanUrl, options);
     } catch (retryErr) {
       console.error(`[Supabase Fetch Retry Failed] Request to ${url} failed again:`, retryErr);
