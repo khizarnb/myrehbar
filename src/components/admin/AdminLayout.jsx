@@ -17,6 +17,7 @@ const NAV = [
   { to: "/admin/categories", label: "Categories", icon: Tags },
   { to: "/admin/inventory", label: "Inventory", icon: Archive },
   { to: "/admin/customers", label: "Customers", icon: Users },
+  { to: "/admin/messages", label: "Contact Messages", icon: MessageSquare },
   { to: "/admin/journal", label: "Blogs", icon: FileText },
   { to: "/admin/pages", label: "Pages", icon: File },
   { to: "/admin/media", label: "Media Library", icon: Image },

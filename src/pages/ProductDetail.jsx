@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useProductBySlug } from "@/lib/entityData";
 import { useCart } from "@/lib/CartContext";
@@ -16,6 +16,14 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState(null);
   const { addItem, setIsCartOpen } = useCart();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.title} — REHBAR`;
+      const descMeta = document.querySelector('meta[name="description"]');
+      if (descMeta && product.story) descMeta.setAttribute('content', product.story.slice(0, 160));
+    }
+  }, [product]);
 
   const handleAddToCart = () => {
     if (!selectedSize) return;

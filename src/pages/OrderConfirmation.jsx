@@ -72,6 +72,12 @@ export default function OrderConfirmation() {
               <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Subtotal</span>
               <span className="font-body text-sm text-[#E6E2D3]">${order.subtotal}</span>
             </div>
+            {order.discount_amount > 0 && (
+              <div className="flex justify-between">
+                <span className="font-mono text-xs tracking-[0.2em] text-emerald-400 uppercase">Discount ({order.coupon_code})</span>
+                <span className="font-body text-sm text-emerald-400 font-bold">-${order.discount_amount}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Shipping</span>
               <span className="font-body text-sm text-[#E6E2D3]">${order.shipping_cost}</span>

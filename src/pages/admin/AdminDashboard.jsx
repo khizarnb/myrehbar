@@ -1,9 +1,11 @@
+import { db } from '@/api/rehbarClient';
 import React, { useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
+import { useQuery } from '@tanstack/react-query';
 import { 
   DollarSign, ShoppingCart, Users, Package, Clock, RefreshCw, CheckCircle, 
   XCircle, RotateCcw, TrendingUp, Calendar, ArrowUpRight, BarChart3, PieChart, 
-  AlertCircle, ShieldAlert 
+  AlertCircle, ShieldAlert, MessageSquare 
 } from "lucide-react";
 import { useProducts, useOrders, useCustomers } from "@/lib/entityData";
 
@@ -15,10 +17,15 @@ export default function AdminDashboard() {
   const { data: products } = useProducts();
   const { data: orders } = useOrders();
   const { data: customers } = useCustomers();
+  const { data: contactMessages = [] } = useQuery({
+    queryKey: ["contact_messages"],
+    queryFn: async () => await db.entities.ContactMessage.list(),
+  });
 
   const allOrders = orders || [];
   const allProducts = products || [];
   const allCustomers = customers || [];
+  const unreadMessages = contactMessages.filter(m => !m.read).length;
 
   // Filter if staff or customer testing role permissions
   if (activeRole === "customer") {
@@ -72,6 +79,7 @@ export default function AdminDashboard() {
     { title: "Total Revenue", value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-emerald-400", bg: "bg-emerald-500/10", sub: "+18.4% from last month" },
     { title: "Total Orders", value: totalOrders, icon: ShoppingCart, color: "text-blue-400", bg: "bg-blue-500/10", sub: "Global store transactions" },
     { title: "Total Customers", value: totalCustomers, icon: Users, color: "text-purple-400", bg: "bg-purple-500/10", sub: "Registered & Guest" },
+    { title: "Contact Messages", value: contactMessages.length, icon: MessageSquare, color: "text-rose-400", bg: "bg-rose-500/10", sub: `${unreadMessages} unread inquiries` },
     { title: "Total Products", value: totalProducts, icon: Package, color: "text-amber-400", bg: "bg-amber-500/10", sub: "Active SKU drops" },
     { title: "Pending Orders", value: pendingOrders, icon: Clock, color: "text-amber-400", bg: "bg-amber-500/10", sub: "Awaiting fulfillment" },
     { title: "Processing / Shipped", value: processingOrders, icon: RefreshCw, color: "text-blue-400", bg: "bg-blue-500/10", sub: "In transit to customer" },
@@ -332,6 +340,45 @@ export default function AdminDashboard() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Recent Contact Messages */}
+      <div className="bg-[#101010] border border-[#1e1e1e] rounded-xl overflow-hidden mt-8">
+        <div className="px-6 py-4 border-b border-[#1e1e1e] flex items-center justify-between">
+          <div>
+            <h3 className="font-heading text-base font-bold text-white flex items-center gap-2">
+              <MessageSquare size={18} className="text-[#C4311E]" /> Recent Customer Inquiries & Messages
+            </h3>
+            <p className="font-body text-xs text-[#888]">Customer contact form submissions awaiting response</p>
+          </div>
+          <Link to="/admin/messages" className="font-mono text-xs text-[#C4311E] hover:underline">View All Messages ({contactMessages.length}) →</Link>
+        </div>
+        <div className="p-6">
+          {contactMessages.length === 0 ? (
+            <p className="font-body text-xs text-[#6B6B6B] text-center py-4">No recent customer inquiries yet. Once submitted via your Contact page, they will appear here instantly.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {contactMessages.slice(0, 3).map(m => (
+                <div key={m.id} className="bg-[#151515] border border-[#222] p-4 rounded-lg flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-heading text-xs font-bold text-white">{m.name}</span>
+                      <span className={`px-2 py-0.5 rounded font-mono text-[9px] uppercase font-bold ${m.read ? "bg-white/10 text-[#888]" : "bg-[#C4311E]/20 text-[#C4311E] border border-[#C4311E]/30"}`}>
+                        {m.read ? "Read" : "New"}
+                      </span>
+                    </div>
+                    <p className="font-mono text-[10px] text-blue-400 mb-2">{m.email} {m.phone ? `• ${m.phone}` : ""}</p>
+                    <p className="font-body text-xs text-[#ccc] line-clamp-3 italic">"{m.message}"</p>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-[#222] flex items-center justify-between">
+                    <span className="font-mono text-[9px] text-[#6B6B6B]">{new Date(m.created_at || Date.now()).toLocaleDateString()}</span>
+                    <Link to="/admin/messages" className="font-mono text-[10px] text-[#E6E2D3] hover:text-[#C4311E] uppercase">Reply / Manage →</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

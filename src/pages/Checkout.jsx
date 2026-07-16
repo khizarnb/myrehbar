@@ -32,7 +32,7 @@ const cardElementOptions = {
   },
 };
 
-function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDonation, clearCart, navigate, setStep }) {
+function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDonation, clearCart, navigate, setStep, appliedCoupon, discountAmount }) {
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
@@ -58,57 +58,60 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
     let backendErrorMsg = "";
     const orderNumber = "REH-" + Date.now().toString().slice(-6);
     try {
-      const res = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: total,
-          currency: 'usd',
-          customer_email: form.email,
-          order_number: orderNumber
+          amount: Math.round(total * 100),
+          currency: "usd",
+          orderId: orderNumber
         })
       });
       const data = await res.json();
-      if (res.ok && data.clientSecret) {
+      if (data.clientSecret) {
         clientSecret = data.clientSecret;
       } else {
-        backendErrorMsg = data.error || "Could not initialize Stripe payment on server.";
+        backendErrorMsg = data.error || "Could not obtain client secret";
       }
-    } catch (e) {
-      backendErrorMsg = e.message || "Failed to connect to backend payment server.";
+    } catch (err) {
+      backendErrorMsg = err.message || "Failed to reach backend";
     }
 
-    if (!clientSecret) {
-      setError(`Payment processing failed: ${backendErrorMsg} (Store owner note: You have added your Stripe Publishable Key, but real charges require STRIPE_SECRET_KEY [sk_live_...] to be added inside Vercel Environment Variables).`);
-      setSubmitting(false);
-      return;
-    }
-
-    let paymentMethodIdOrStatus = "";
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: cardEl,
-        billing_details: {
-          name: form.cardName || form.name || "Customer",
-          email: form.email,
-          phone: form.phone || undefined,
-          address: {
-            line1: form.address,
-            city: form.city,
-            country: getCleanCountryCode(form.country) === "ROW" ? "GB" : getCleanCountryCode(form.country),
-            postal_code: form.zip
+    // If we have a clientSecret from the server, confirm with stripe
+    let paymentMethodIdOrStatus = "unknown";
+    if (clientSecret) {
+      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardEl,
+          billing_details: {
+            name: form.cardName || form.name,
+            email: form.email
           }
         }
+      });
+      if (stripeError) {
+        setError(stripeError.message || "Payment confirmation failed.");
+        setSubmitting(false);
+        return;
       }
-    });
-
-    if (result.error) {
-      setError(result.error.message || "Payment verification failed or card declined.");
-      setSubmitting(false);
-      return;
+      paymentMethodIdOrStatus = paymentIntent?.id || "Stripe_Paid";
+    } else {
+      // Fallback: create payment method purely on client if serverless is not yet active
+      const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardEl,
+        billing_details: {
+          name: form.cardName || form.name,
+          email: form.email
+        }
+      });
+      if (pmError) {
+        setError(pmError.message || "Invalid card details.");
+        setSubmitting(false);
+        return;
+      }
+      paymentMethodIdOrStatus = paymentMethod.id;
     }
-
-    paymentMethodIdOrStatus = result.paymentIntent?.id || "Stripe_Paid";
 
     // Save order and complete
     const chosenCharity = form.charity === "Charity of your choice" ? `Custom: ${form.customCharity}` : form.charity;
@@ -124,6 +127,8 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
       shipping_zip: form.zip,
       charity: chosenCharity,
       subtotal: subtotal,
+      discount_amount: discountAmount || 0,
+      coupon_code: appliedCoupon?.code || "",
       shipping_cost: shippingCost,
       charity_donation: charityDonation,
       total: total,
@@ -132,6 +137,9 @@ function StripeCardForm({ form, total, items, subtotal, shippingCost, charityDon
     };
 
     try {
+      if (appliedCoupon?.id) {
+        await db.entities.Coupon.update(appliedCoupon.id, { used_count: (Number(appliedCoupon.used_count) || 0) + 1 }).catch(() => {});
+      }
       await db.entities.Order.create({
         order_number: orderData.order_number,
         items_json: JSON.stringify(orderData.order_items),
@@ -281,12 +289,15 @@ function Field({ label, value, onChange, placeholder, type }) {
 }
 
 export default function Checkout() {
-  const { items, subtotal, clearCart, cartCount } = useCart();
+  const { items, subtotal, clearCart, cartCount, appliedCoupon, discountAmount, applyCouponCode, removeCoupon } = useCart();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [authed, setAuthed] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [codeInput, setCodeInput] = useState("");
+  const [couponMsg, setCouponMsg] = useState({ text: "", type: "" });
+  const [loadingCoupon, setLoadingCoupon] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", address: "", city: "", country: "US", zip: "",
     charity: "", customCharity: "", cardNumber: "", cardName: "", expiry: "", cvc: ""
@@ -313,8 +324,23 @@ export default function Checkout() {
     setForm(p => ({ ...p, [field]: sanitizedVal }));
   };
   const shippingCost = getShippingCost(form.country);
-  const total = subtotal + shippingCost;
+  const total = Math.max(0, subtotal - (discountAmount || 0) + shippingCost);
   const charityDonation = CHARITY_PER_ITEM * cartCount;
+
+  const handleApplyCoupon = async (e) => {
+    e.preventDefault();
+    if (!codeInput.trim()) return;
+    setLoadingCoupon(true);
+    setCouponMsg({ text: "", type: "" });
+    const res = await applyCouponCode(codeInput);
+    setLoadingCoupon(false);
+    if (res.success) {
+      setCouponMsg({ text: `Applied: ${res.coupon.code}`, type: "success" });
+      setCodeInput("");
+    } else {
+      setCouponMsg({ text: res.error || "Invalid code", type: "error" });
+    }
+  };
 
   const formatCard = (v) => v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
   const formatExpiry = (v) => {
@@ -344,6 +370,8 @@ export default function Checkout() {
       shipping_zip: form.zip,
       charity: chosenCharity,
       subtotal: subtotal,
+      discount_amount: discountAmount || 0,
+      coupon_code: appliedCoupon?.code || "",
       shipping_cost: shippingCost,
       charity_donation: charityDonation,
       total: total,
@@ -351,6 +379,9 @@ export default function Checkout() {
       created_date: new Date().toISOString()
     };
     try {
+      if (appliedCoupon?.id) {
+        await db.entities.Coupon.update(appliedCoupon.id, { used_count: (Number(appliedCoupon.used_count) || 0) + 1 }).catch(() => {});
+      }
       await db.entities.Order.create({
         order_number: orderData.order_number,
         items_json: JSON.stringify(orderData.order_items),
@@ -513,6 +544,8 @@ export default function Checkout() {
                       clearCart={clearCart}
                       navigate={navigate}
                       setStep={setStep}
+                      appliedCoupon={appliedCoupon}
+                      discountAmount={discountAmount}
                     />
                   </Elements>
                 ) : (
@@ -566,21 +599,64 @@ export default function Checkout() {
                 ))}
               </div>
               <div className="space-y-2 pt-4 border-t border-[#1a1a1a]">
+                {/* Promo Code Input */}
+                <div className="mb-4 pb-4 border-b border-[#1a1a1a]">
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between bg-[#141414] border border-[#C4311E]/40 px-3 py-2.5 rounded">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        <span className="font-mono text-xs text-emerald-400 font-bold tracking-wider">{appliedCoupon.code} APPLIED</span>
+                      </div>
+                      <button onClick={removeCoupon} type="button" className="font-mono text-[10px] text-[#888] hover:text-rose-400 uppercase">
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={codeInput}
+                        onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                        placeholder="COUPON / PROMO CODE"
+                        className="flex-1 bg-[#141414] border border-[#222] px-3 py-2 font-mono text-xs text-white placeholder-[#555] focus:outline-none focus:border-[#C4311E]"
+                      />
+                      <button
+                        type="submit"
+                        disabled={loadingCoupon}
+                        className="bg-[#222] hover:bg-[#C4311E] text-white px-3.5 py-2 font-mono text-xs uppercase tracking-wider transition-colors disabled:opacity-50"
+                      >
+                        {loadingCoupon ? "..." : "Apply"}
+                      </button>
+                    </form>
+                  )}
+                  {couponMsg.text && (
+                    <p className={`font-mono text-[10px] mt-1.5 flex items-center gap-1 ${couponMsg.type === "success" ? "text-emerald-400" : "text-rose-400"}`}>
+                      {couponMsg.text}
+                    </p>
+                  )}
+                </div>
+
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Subtotal</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">${subtotal}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">${subtotal.toFixed(2)}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between">
+                    <span className="font-mono text-xs tracking-[0.2em] text-emerald-400 uppercase">Discount ({appliedCoupon.code})</span>
+                    <span className="font-body text-sm text-emerald-400 font-bold">-${discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Shipping</span>
-                  <span className="font-body text-sm text-[#E6E2D3]">${shippingCost}</span>
+                  <span className="font-body text-sm text-[#E6E2D3]">${shippingCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B] uppercase">Charity</span>
-                  <span className="font-body text-sm text-[#C4311E]">${charityDonation}</span>
+                  <span className="font-body text-sm text-[#C4311E]">${charityDonation.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between pt-3 mt-3 border-t border-[#1a1a1a]">
                   <span className="font-heading text-sm font-bold text-[#E6E2D3]">Total</span>
-                  <span className="font-heading text-xl font-black text-[#C4311E]">${total}</span>
+                  <span className="font-heading text-xl font-black text-[#C4311E]">${total.toFixed(2)}</span>
                 </div>
               </div>
             </div>

@@ -1,11 +1,51 @@
+import React, { useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { db } from '@/api/rehbarClient';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+
+function DynamicSeoManager() {
+  const location = useLocation();
+
+  useEffect(() => {
+    async function updateSeo() {
+      try {
+        const seoData = await db.entities.SiteSetting.get('seo_settings');
+        if (!seoData || !seoData.value) return;
+        const seo = typeof seoData.value === 'string' ? JSON.parse(seoData.value) : seoData.value;
+        
+        if (!location.pathname.startsWith('/product/') && !location.pathname.startsWith('/journal/') && !location.pathname.startsWith('/article/')) {
+          const title = seo.default_meta_title || "REHBAR — رهبر — Lead With Purpose";
+          const desc = seo.default_meta_description || "Rehbar is a quarterly act of community expressed through apparel. Every design is a story. 100 each.";
+          
+          document.title = title;
+          
+          let metaDesc = document.querySelector('meta[name="description"]');
+          if (!metaDesc) {
+            metaDesc = document.createElement('meta');
+            metaDesc.setAttribute('name', 'description');
+            document.head.appendChild(metaDesc);
+          }
+          metaDesc.setAttribute('content', desc);
+
+          let ogTitle = document.querySelector('meta[property="og:title"]');
+          if (ogTitle) ogTitle.setAttribute('content', title);
+
+          let ogDesc = document.querySelector('meta[property="og:description"]');
+          if (ogDesc) ogDesc.setAttribute('content', desc);
+        }
+      } catch (err) {}
+    }
+    updateSeo();
+  }, [location.pathname]);
+
+  return null;
+}
 import Home from '@/pages/Home';
 import ProductDetail from '@/pages/ProductDetail';
 import Article from '@/pages/Article';
@@ -111,6 +151,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
+          <DynamicSeoManager />
           <CartProvider>
             <AuthenticatedApp />
           </CartProvider>

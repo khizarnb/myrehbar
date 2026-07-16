@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useJournalArticleBySlug, useProducts } from "@/lib/entityData";
 import Navbar from "@/components/Navbar";
@@ -10,6 +10,14 @@ export default function JournalArticle() {
   const { slug } = useParams();
   const { data: article, isLoading } = useJournalArticleBySlug(slug);
   const { data: products } = useProducts();
+
+  useEffect(() => {
+    if (article) {
+      document.title = `${article.title} — REHBAR Journal`;
+      const descMeta = document.querySelector('meta[name="description"]');
+      if (descMeta && article.excerpt) descMeta.setAttribute('content', article.excerpt.slice(0, 160));
+    }
+  }, [article]);
 
   if (isLoading && !article) {
     return (
