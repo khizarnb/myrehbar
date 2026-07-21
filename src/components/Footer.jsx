@@ -2,6 +2,7 @@ import { db } from '@/api/rehbarClient';
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { Instagram } from "lucide-react";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -57,7 +58,12 @@ export default function Footer() {
 
               <div className="mt-12">
                 <h3 className="font-heading text-2xl font-bold text-[#E6E2D3] tracking-wide mb-4">CONTACT THE CURATOR</h3>
-                <a href="mailto:sales@myrehbar.com" className="font-mono text-sm text-[#E6E2D3]/80 hover:text-[#E6E2D3] transition-colors">sales@myrehbar.com</a>
+                <div className="flex flex-col gap-3">
+                  <a href="mailto:sales@myrehbar.com" className="font-mono text-sm text-[#E6E2D3]/80 hover:text-[#E6E2D3] transition-colors">sales@myrehbar.com</a>
+                  <a href="https://www.instagram.com/myrehbar" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 font-mono text-sm text-[#E6E2D3]/80 hover:text-[#E6E2D3] transition-colors">
+                    <Instagram size={16} /> @myrehbar
+                  </a>
+                </div>
               </div>
             </div>
           </div>
