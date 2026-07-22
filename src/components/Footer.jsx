@@ -28,7 +28,7 @@ export default function Footer() {
                 className="h-16 w-auto mb-8"
               />
               <p className="font-body text-[#E6E2D3]/80 text-lg leading-relaxed max-w-md">
-                An act of community expressed through apparel. Every design is a story crafted with meaning and purpose.
+                An act of community, expressed through apparel. Every design is a story crafted with meaning and purpose.
               </p>
               <div className="mt-8 font-mono text-xs tracking-[0.2em] text-[#E6E2D3]/50 uppercase">
                 REHBAR — COLLECTION

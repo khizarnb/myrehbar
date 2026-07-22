@@ -50,7 +50,7 @@ export default function Home() {
               The Manifesto
             </p>
             <blockquote className="font-heading text-2xl md:text-4xl font-light text-[#E6E2D3] leading-relaxed tracking-wide">
-              "This is not just a clothing brand. It is an act of community expressed through apparel."
+              "This is not just a clothing brand. It is an act of community, expressed through apparel."
             </blockquote>
             <div className="mt-10 space-y-3">
               <p className="font-mono text-xs tracking-[0.2em] text-[#6B6B6B]">EVERY DESIGN IS A STORY</p>

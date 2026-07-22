@@ -21,7 +21,7 @@ function DynamicSeoManager() {
         
         if (!location.pathname.startsWith('/product/') && !location.pathname.startsWith('/journal/') && !location.pathname.startsWith('/article/')) {
           const title = seo.default_meta_title || "REHBAR — رهبر — Lead With Purpose";
-          const desc = seo.default_meta_description || "Rehbar is a quarterly act of community expressed through apparel. Every design is a story. 100 each.";
+          const desc = seo.default_meta_description || "Rehbar is a quarterly act of community, expressed through apparel. Every design is a story. 100 each.";
           
           document.title = title;
           
